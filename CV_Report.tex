@@ -114,13 +114,19 @@ A description of our setup and the author's setups.
 The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
 
 \subsection{Implementation Details}
+\paragraph{Hardware \& Software Environment}  
+All experiments were run on a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
+
+
 \subsubsection{Query2Label}
+All Query2Label experiments were conducted on environment versions cuda==12.4, torch==2.1.0+cu121, torchvision==0.16.0+cu121, python==3.11.8.
 We evaluated the Query2Label model using the best performing backbone model, the CvT-w24 backbone, with a $384\time 384$ input resolution, pretrained on the ImageNet-22k dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used a pretrained model checkpoint released by the authors, which was trained on the MS-COCO 2024 dataset, described in the previous section. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
 
 % \paragraph{Data preparation}
 % \paragraph{Hyperparameters}
 
 \subsubsection{Multi-Label Learning from Single Positive Labels}
+All MLSPL experiments were conducted on environment versions cuda==12.4, torch==2.2.1+cu121, torchvision==0.17.1+cu121, python==3.11.8.
 \paragraph{Data preparation}
 The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}.
 
