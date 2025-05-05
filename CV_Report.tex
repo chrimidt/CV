@@ -159,19 +159,23 @@ To asses model performance, we adopt mean Average Precision (mAP), a standard me
 \section{Results and Discussion}
 This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
 
-\begin{table}[!t]
-    \caption{Comparison of mAP Results Between Our Implementation and Reported Results on the MS-COCO 2014 Dataset.}
+
+\begin{table*}[!t]
+    \small
+    \caption{Comparison of mAP results retween our experiments and reported mAP results on the MS-COCO 2014 Dataset.}
     \label{tab:map_comparison}
     \centering
-    \begin{tabular}{l l c c}
+    \begin{tabular}{l l l c c}
     \toprule
-    \textbf{Method} & \textbf{Dataset} & \textbf{mAP (Ours)} & \textbf{mAP (Paper)} \\
+    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
     \midrule
-    Q2L  & COCO & 91.3 & 91.3 \\
-    MLSPL & COCO & 66.3 & 66.3 \\
+    Q2L-R101-448 & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
+    Q2L-R101-576 & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
+    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
+    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
     \bottomrule
     \end{tabular}
-\end{table}
+\end{table*}
 
 
 \subsection{Query2Label}
