@@ -90,6 +90,9 @@ Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite
 \section{Theoretical Background}
 The theory behind multi-label classification and the methods in the chosen papers.
 
+\subsection{Multi-label Classification}
+Write about the theory behind multi-label classification/learning.
+
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
 
@@ -105,22 +108,32 @@ How it uses weak supervision and contrastive learning.
 \section{Methodology}
 Focus Methodology on the rationale for choosing these methods, how the operationalized their training, and any adaptations made for reproduction.
 
-% ======================== Experimental Setup  ========================
-
-\section{Experimental Setup}
-A description of our setup and the author's setups.
+\subsection{Overview of Approach}
+A brief description of what we did to solve the multi-label classification problem. 
 
 \subsection{Dataset}
 The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
 
-\subsection{Implementation Details}
-\paragraph{Hardware \& Software Environment}  
+\subsection{Query2Label}
+Write about why we chose Query2Label for solving the multi-label classification problems.
+
+\subsection{MLSPL}
+Write about why we chose MLSPL for solving the multi-label classification problem.
+
+
+% ======================== Experimental Setup  ========================
+
+\subsection{Experiments}
+A description of our setup versus the author's setups.
+
+\vspace{1em}
+
 All experiments were run on a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
 
 
 \subsubsection{Query2Label}
 All Query2Label experiments were conducted on environment versions cuda==12.4, torch==2.1.0+cu121, torchvision==0.16.0+cu121, python==3.11.8.
-We evaluated the Query2Label model using the best performing backbone model, the CvT-w24 backbone, with a $384\time 384$ input resolution, pretrained on the ImageNet-22k dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used a pretrained model checkpoint released by the authors, which was trained on the MS-COCO 2024 dataset, described in the previous section. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
+We evaluated the Query2Label model using the best performing backbone model, the CvT-w24 backbone, with a $384\time 384$ input resolution, pretrained on the ImageNet-22k dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used a pretrained model checkpoint released by the authors, which was trained on the MS-COCO 2024 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
 
 % \paragraph{Data preparation}
 % \paragraph{Hyperparameters}
