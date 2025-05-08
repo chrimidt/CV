@@ -13,6 +13,10 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \usepackage{balance}
 \usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{physics}
+
 
 
 
@@ -85,13 +89,19 @@ Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Be
 
 Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite{Li_2003}.
 
+\paragraph{Partially Observed Labels}
+
+\paragraph{Heuristics}
+Heuristics can be used to reduce the required
+annotation effort [34, 18], but this runs the risk of increasing
+error in the labels \cite{mlsp}.
 % ======================== Theoretical Background ========================
 
 \section{Theoretical Background}
-The theory behind multi-label classification and the methods in the chosen papers.
+This section describes the theory behind multi-label learning and the methods in the chosen papers.
 
 \subsection{Multi-label Classification}
-Write about the theory behind multi-label classification/learning.
+Contrary to multi-class classification, where each input $x$ from the input space $\mathcal{X}$ is assigned a single label from $\{1,...,L\}$, each $x$ in multi-label classification is associated with a vector of labels $y$ from the label space $\mathcal{Y}=\{0,1\}^L$ \cite{mlsp}. Here, 
 
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
@@ -103,10 +113,28 @@ The CvT by Wu et al. \cite{CvT}.
 Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{mlsp}.
 How it uses weak supervision and contrastive learning.
 
+\paragraph{Online Estimation of Unobserved Labels}
+
+\begin{equation}
+    \mathcal{L}_{ROLE}(\bm{F}_B, \bm{\tilde{Y}}_B) = \frac{\mathcal{L}'(\bm{F}_B)|\bm{\tilde{Y}}+\mathcal{L}'(\bm{\tilde{Y}}|\bm{F}_B)}{2}
+\end{equation}
+
+for a batch $B$, where $\bm{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\bm{F}\in[0,1]^{N\times L}$ is the matrix of classifier predictions.
+
+The goal is to train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$
+
 % ======================== Methodology ========================
 
 \section{Methodology}
-Focus Methodology on the rationale for choosing these methods, how the operationalized their training, and any adaptations made for reproduction.
+% Focus Methodology on the rationale for choosing these methods, how the operationalized their training, and any adaptations made for reproduction.
+
+In real-world datasets, obtaining full label annotations is practiaclly impossible.
+This project focuses on finding solutions to the multi-label learning problems:
+\begin{itemize} 
+    \item  The challenge of multi-label learning in scenarios where only a single positive label per image is available durin training (MLSPL).
+    \item Label imbalance (Query2Label).
+    \item Feature localization (Query2Label).
+\end{itemize}
 
 \subsection{Overview of Approach}
 A brief description of what we did to solve the multi-label classification problem. 
@@ -157,9 +185,6 @@ To asses model performance, we adopt mean Average Precision (mAP), a standard me
 % ======================== Results and Discussion ========================
 
 \section{Results and Discussion}
-This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
-
-
 \begin{table*}[!t]
     \small
     \caption{Comparison of mAP results retween our experiments and reported mAP results on the MS-COCO 2014 Dataset.}
@@ -176,6 +201,10 @@ This section compares results from the experiments to the those of the papers. D
     \bottomrule
     \end{tabular}
 \end{table*}
+
+This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
+
+
 
 
 \subsection{Query2Label}
