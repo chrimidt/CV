@@ -15,7 +15,6 @@
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{bm}
-\usepackage{physics}
 
 
 
@@ -67,10 +66,12 @@ classification, deep learning for MLC.
 
 Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. In this project we investigate two methods aimed to solve two different problems within multi-label learning: Query2Label targets the challenges of imbalance and object localization, whereas MLSPL addresses the challenge of training an effective multi-label classifier from minimal supervision.
 
-\subsection{Multi-Label Classification Problem}
-% ======================== Related Work ========================
+This project focuses on testing existing solutions to two problems that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision, which is often the case for data.
 
-\section{Related Work}
+% ======================== Problem Overview ========================
+\section{Problem Overview}
+
+\subsection{Related Work}
 Multi-label learning is a well studied problem within computer vision \cite{mlsp}. 
 
 % [] Provide a concise review of existing methods in multi-label classification.
@@ -78,11 +79,6 @@ Multi-label learning is a well studied problem within computer vision \cite{mlsp
 % [] Include references to transformer-based methods (like Q2L), and weakly supervised learning methods (like MLSPL).
 
 \paragraph{Loss Functions}
-
-\paragraph{Convolutional Neural Networks}
-
-\paragraph{Vision Transformer}
-
 
 \paragraph{PU learning} 
 Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Bekker_2020}.
@@ -97,25 +93,29 @@ annotation effort [34, 18], but this runs the risk of increasing
 error in the labels \cite{mlsp}.
 % ======================== Theoretical Background ========================
 
-\section{Theoretical Background}
-Contrary to multi-class or binary classification where each instance is associated with only one label from a set of categories (e.g. person, dog, car, etc.), multi-label classification may assign an instance multiple labels \cite{mlsp}. Assuming $K$ categories, an input image $x\in \mathcal{X}$ is associated with a vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
+\section{Background}
+Contrary to binary or multi-class classification where each instance is associated with only one label, multi-label classification allows assigning multiple labels to a single input \cite{mlsp}. Given $K$ categories, an input image $x\in \mathcal{X}$ is associated with a binary vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
 
-This project focuses on finding solutions to some of the problems that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision, which is often the case for data.
+\subsection{Challenges in Multi-Label Learning}
+\paragraph{Label Correlation}
+\paragraph{Class Imbalance}
+\paragraph{Sparse Supervision}
 
-\subsection{Feature Extraction}
+\subsection{Backbone Architechtures}
 In the field of computer vision there exists different deep learning methods that extract features from input images, and the two main neural networks are convolutional neural networks and vision transformers. 
 
-\subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
-Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
-
-\paragraph{Backbone architecture}
+\paragraph{Convolutional Neural Networks (CNNs)}
+\paragraph{Vision Transformers (ViTs)}
 The CvT by Wu et al. \cite{CvT}.
 
-\subsection{Multi-Label Learning from Single Positive Labels}
-Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{mlsp}.
-How it uses weak supervision and contrastive learning.
 
-\paragraph{Online Estimation of Unobserved Labels}
+
+\subsection{Loss Functions}
+\paragraph{Binary Cross-Entropy}
+\paragraph{Focal Loss}
+\paragraph{Assymetric Loss}
+
+\paragraph{Online Estimation of Unobserved Labels (ROLE)}
 
 \begin{equation}
     \mathcal{L}_{ROLE}(\bm{F}_B, \bm{\tilde{Y}}_B) = \frac{\mathcal{L}'(\bm{F}_B)|\bm{\tilde{Y}}+\mathcal{L}'(\bm{\tilde{Y}}|\bm{F}_B)}{2}
@@ -125,9 +125,11 @@ for a batch $B$, where $\bm{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estima
 
 The goal is to train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$
 
+\subsection{Transformers and Self-Attention}
+
 % ======================== Methodology ========================
 
-\section{Methodology}
+\section{Method}
 % Focus Methodology on the rationale for choosing these methods, how the operationalized their training, and any adaptations made for reproduction.
 
 In real-world datasets, obtaining full label annotations is practiaclly impossible.
@@ -144,12 +146,12 @@ A brief description of what we did to solve the multi-label classification probl
 \subsection{Dataset}
 The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
 
-\subsection{Query2Label}
-Write about why we chose Query2Label for solving the multi-label classification problems.
+\subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
+Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
 
-\subsection{MLSPL}
-Write about why we chose MLSPL for solving the multi-label classification problem.
-
+\subsection{Multi-Label Learning from Single Positive Labels}
+Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{mlsp}.
+How it uses weak supervision and contrastive learning.
 
 % ======================== Experimental Setup  ========================
 
@@ -161,14 +163,14 @@ A description of our setup versus the author's setups.
 All experiments were run on a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
 
 
-\subsubsection{Query2Label}
+\paragraph{Query2Label}
 All Query2Label experiments were conducted on environment versions cuda==12.4, torch==2.1.0+cu121, torchvision==0.16.0+cu121, python==3.11.8.
 We evaluated the Query2Label model using the best performing backbone model, the CvT-w24 backbone, with a $384\time 384$ input resolution, pretrained on the ImageNet-22k dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used a pretrained model checkpoint released by the authors, which was trained on the MS-COCO 2024 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
 
 % \paragraph{Data preparation}
 % \paragraph{Hyperparameters}
 
-\subsubsection{Multi-Label Learning from Single Positive Labels}
+\paragraph{Multi-Label Learning from Single Positive Labels}
 All MLSPL experiments were conducted on environment versions cuda==12.4, torch==2.2.1+cu121, torchvision==0.17.1+cu121, python==3.11.8.
 \paragraph{Data preparation}
 The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}.
@@ -190,7 +192,7 @@ To asses model performance, we adopt mean Average Precision (mAP), a standard me
 \begin{table*}[!t]
     \small
     \caption{Comparison of mAP results retween our experiments and reported mAP results on the MS-COCO 2014 Dataset.}
-    \label{tab:map_comparison}
+    \label{tab:q2l_map_comparison}
     \centering
     \begin{tabular}{l l l c c}
     \toprule
@@ -207,11 +209,10 @@ To asses model performance, we adopt mean Average Precision (mAP), a standard me
 This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
 
 
+\subsection{Results from Query2Label}
+The results from our experiments are compared to those of the paper in table \ref{tab:q2l_map_comparison}. 
 
-
-\subsection{Query2Label}
-
-\subsection{Multi-Label Learning from Single Positive Labels}
+\subsection{Results from Multi-Label Learning from Single Positive Labels}
 
 % ======================== Conclusion ========================
 
