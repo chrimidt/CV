@@ -107,20 +107,27 @@ In the field of computer vision there exists different deep learning methods tha
 
 
 
-\subsection{Transformers}
+\subsection{Transformer Architectures}
 Transformers, introduced by Vaswani et al. \cite{vaswani2023attentionneed}, are a type of neural network architecture initially developed to model long-range dependencies in sequence data. They achieve this using attention and self-attention mechanisms, which enables the model to have a long-term memory of inputs, and dynamically weigh the importance of each element in the input sequence. Originally, transformer-based models was mainly delevoped for natural language processing tasks, but the introduction of the Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, transformers have been widely used for computer vision tasks. 
 
+\paragraph{Architecture}
+The original transformer consists of an encoder-decoder structure. Both encoder and decoder are made of a stack of identical layers, where encoder layers contain a multi-head self-attention mechanism followed by a position-wise feed-forward network. In addition, decoder layers consists of an encoder-decoder attention layer. 
+
+The transfomer encoder is of interest, as the authors of \cite{Query2Label} use them to extract features and automatically learn label embedding, described in section TODO.
+
 \paragraph{Attention}
-The core principle of the transformer architecture is the attention mechanism, which allows the model to attend to all posistions in an input sequence when processing each element. 
+The core principle of the transformer architecture is the attention mechanism, which allows the model to attend to all posistions in an input sequence when processing each element. Thus alloowing the model to weigh the relevance of different posistions in a sequence. Given a query and a set of key-value pairs, the attention function computes a weighted sum of the values, where the weights are determined by similarities between the query and the keys.
 
 \paragraph{Self-Attention}
-The transformer model uses self-attention by relating every element in the input sequence to every other element. Given an input sequence of feature vectors, the model generates three representations: queries $Q$, keys $K$, and values $V$. The self-attention is computed as:
+The transformer model uses self-attention by relating every element in the input sequence to every other element. The attention function is a function that maps a query and a set of key-value pairs to an output. The scaled dot-product self-attention is defined as:
 
 \begin{equation}
     \text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
 \end{equation}
 
-where $d_k$ is the dimension of the key vectors and serves as a scaling factor. 
+\noindent where $Q$, $K$, $V$, are the query, key, and value vectors, and $d_k$ is the dimension of the queries and key vectors and serves as a scaling factor \cite{vaswani2023attentionneed}. 
+
+
 
 \paragraph{Multi-Head Attention}
 \paragraph{Vision Transformers (ViTs)}
