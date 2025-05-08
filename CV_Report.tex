@@ -98,10 +98,12 @@ error in the labels \cite{mlsp}.
 % ======================== Theoretical Background ========================
 
 \section{Theoretical Background}
-This section describes the theory behind multi-label learning and the methods in the chosen papers.
+Contrary to multi-class or binary classification where each instance is associated with only one label from a set of categories (e.g. person, dog, car, etc.), multi-label classification may assign an instance multiple labels \cite{mlsp}. Assuming $K$ categories, an input image $x\in \mathcal{X}$ is associated with a vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
 
-\subsection{Multi-label Classification}
-Contrary to multi-class classification, where each input $x$ from the input space $\mathcal{X}$ is assigned a single label from $\{1,...,L\}$, each $x$ in multi-label classification is associated with a vector of labels $y$ from the label space $\mathcal{Y}=\{0,1\}^L$ \cite{mlsp}. Here, 
+This project focuses on finding solutions to some of the problems that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision, which is often the case for data.
+
+\subsection{Feature Extraction}
+In the field of computer vision there exists different deep learning methods that extract features from input images, and the two main neural networks are convolutional neural networks and vision transformers. 
 
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
