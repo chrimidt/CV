@@ -41,17 +41,7 @@
 % [] Evaluate the feasibility and performance of each method.
 
 \begin{abstract}
-    We present in this paper a new architecture, named Convolutional vision Transformer (CvT), that improves Vision
-    Transformer (ViT) in performance and efficiency by introducing convolutions into ViT to yield the best of both designs. This is accomplished through two primary modifications: a hierarchy of Transformers containing a new convolutional token embedding, and a convolutional Transformer
-    block leveraging a convolutional projection. These changes
-    introduce desirable properties of convolutional neural networks (CNNs) to the ViT architecture (i.e. shift, scale,
-    and distortion invariance) while maintaining the merits of
-    Transformers (i.e. dynamic attention, global context, and
-    better generalization). We validate CvT by conducting extensive experiments, showing that this approach achieves
-    state-of-the-art performance over other Vision Transformers and ResNets on ImageNet-1k, with fewer parameters and lower FLOPs. In addition, performance gains
-    are maintained when pretrained on larger datasets (e.g.
-    ImageNet-22k) and fine-tuned to downstream tasks. Pretrained on ImageNet-22k, our CvT-W24 obtains a top-1 accuracy of 87.7\% on the ImageNet-1k val set. Finally, our
-    results show that the positional encoding, a crucial component in existing Vision Transformers, can be safely removed in our model, simplifying the design for higher resolution vision tasks.
+Abstract goes here.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -73,20 +63,19 @@ classification, deep learning for MLC.
 % [] Clarify that the methods are not compared directly, but evaluated independently against the reported baselines.
 
 
-Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. In this project we investigate two methods aimed to solve two different problems within multi-label learning: Query2Label targets the challenges of imbalance and object localization, whereas MLSPL addresses the challenge of training an effective multi-label classifier from minimal supervision.
+Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. 
 
-This project focuses on testing existing solutions to two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision, which is often the case for data.
+In this project we investigate methods aimed to solve two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision, which is often the case for data.
 
-% ======================== Problem Overview ========================
-\section{Problem Overview}
 
-\subsection{Challenges in Multi-Label Learning}
+\subsection{Problem Overview}
+
 \paragraph{Label Correlation}
 \paragraph{Class Imbalance}
 \paragraph{Sparse Supervision}
 
 
-\subsection{Related Work}
+\section{Related Work}
 Multi-label learning is a well studied problem within computer vision \cite{mlsp}. 
 
 % [] Provide a concise review of existing methods in multi-label classification.
@@ -163,10 +152,10 @@ Each layer in the Transformer also includes a fully connected feed-forward netwo
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, is a model for image classification that leverages the transformer architecture: the self-attention mechanism of transformers that allows the model to selectively weigh the significance of each part of the input, and positional embeddings that represent the order of tokens in a sequence. In ViTs, images are represented as sequences, where the label function as a learnable token for classification. The input image is divided into a sequence of patches that are flattened and linearly embedded into a vector. The spatial information is preserved by adding positional encodings to the embeddings. The resulting sequence is fed into a transformer decoder identical to that introduced in \cite{vaswani2023attentionneed} to model global relations for classification.
 
 \subsection{Loss Functions}
-Loss functions are a fundamental component in deep learning, as they serve as a measure of how much the model predictions deviate from the ground truth \cite{zhang2023dive}, guiding optimization. The Binary Cross-Entropy loss is a common choice for multi-label classification for a fully observed data point $(\mathbf{x}_n,\mathbf{y}_n)$ \cite{mlsp}. 
+Loss functions are a fundamental component in deep learning as they serve as a measure of how much the model predictions deviate from the ground truth, guiding optimization of the network \cite{zhang2023dive}. This section describes some of the common loss functions used in multi-label learning, beginning with the Binary Cross-Entropy (BCE) loss.
 
-\paragraph{Binary Cross-Entropy}
-
+\paragraph{Binary Cross-Entropy (BCE)}
+The BCE loss is a common choice for multi-label classification for a fully observed data point $(\mathbf{x}_n,\mathbf{y}_n)$ \cite{mlsp}, as it's purpose is to classify data into one of two possible categories, negative or positive, represented as 0 and 1. 
 
 \paragraph{Focal Loss}
 
@@ -200,8 +189,7 @@ This project focuses on finding solutions to the multi-label learning problems:
 \subsection{Overview of Approach}
 A brief description of what we did to solve the multi-label classification problem. 
 
-\subsection{Dataset}
-The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
+
 
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 \label{sec:q2l_method}
@@ -213,31 +201,29 @@ How it uses weak supervision and contrastive learning.
 
 % ======================== Experimental Setup  ========================
 
-\subsection{Experiments}
+\section{Experiments}
 A description of our setup versus the author's setups.
 
 \vspace{1em}
 
 All experiments were run on a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
 
+\subsection{Dataset}
+The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
 
-\paragraph{Query2Label}
+\subsection{Query2Label}
 All Query2Label experiments were conducted on environment versions cuda==12.4, torch==2.1.0+cu121, torchvision==0.16.0+cu121, python==3.11.8.
 We evaluated the Query2Label model using the best performing backbone model, the CvT-w24 backbone, with a $384\time 384$ input resolution, pretrained on the ImageNet-22k dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used a pretrained model checkpoint released by the authors, which was trained on the MS-COCO 2024 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
 
 % \paragraph{Data preparation}
 % \paragraph{Hyperparameters}
 
-\paragraph{Multi-Label Learning from Single Positive Labels}
+\subsection{Multi-Label Learning from Single Positive Labels}
 All MLSPL experiments were conducted on environment versions cuda==12.4, torch==2.2.1+cu121, torchvision==0.17.1+cu121, python==3.11.8.
 \paragraph{Data preparation}
 The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}.
 
-\vspace{1em}
-
 To convert into a single positive label format, the instructions provided by Cole et al. are followed: firsly, both images and annotations for training and validation are downloaded. Secondly, pre-extracted features for COCO, provided by the authors are downloaded. Lastly, the script \texttt{format\_coco.py} is used to produce uniformly formatted image lists and labels.
-
-\vspace{1em}
 
 \paragraph{Hyperparameters}
 
