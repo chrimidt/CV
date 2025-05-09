@@ -116,7 +116,7 @@ This section describes relevant background theory related to the project and met
 Contrary to binary or multi-class classification where each instance is associated with only one label, multi-label classification allows assigning multiple labels to a single input \cite{mlsp}. Given $K$ categories, an input image $x\in \mathcal{X}$ is associated with a binary vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
 
 \subsection{Convolutional Neural Networks (CNNs)}
-In the field of computer vision there exists different deep learning methods that extract features from input images, and the two main neural networks are convolutional neural networks and vision transformers. 
+In the field of computer vision, Convolutional Neural Networks (CNNs) have been a dominant approach for image analysis tasks since their introduction \cite{lecun95}. CNNs are designed to recognize patterns in images by applying local filters through convolutional layers, preserving the two dimensional input of an image \cite{zhang2023dive}. CNNs consist of three main types of layers: convolutional layers, pooling layers, and a Fully Connected (FC) layer \cite{asawaCS231n}. Convolutional layers extract spatial features through learnable filters, pooling layers reduce dimensionality and summarise information, while the fully connected layer at the end interpret the features to perform the classification.
 
 \subsection{Transformer Architectures}
 Transformers, introduced by Vaswani et al. \cite{vaswani2023attentionneed}, are a type of neural network architecture initially developed to model long-range dependencies in sequence data. They achieve this using attention and self-attention mechanisms, which enables the model to have a long-term memory of inputs, and dynamically weigh the importance of each element in the input sequence. Originally, transformer-based models was mainly delevoped for natural language processing tasks, but the introduction of the Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, transformers have been widely used for computer vision tasks. 
@@ -163,7 +163,7 @@ Each layer in the Transformer also includes a fully connected feed-forward netwo
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, is a model for image classification that leverages the transformer architecture: the self-attention mechanism of transformers that allows the model to selectively weigh the significance of each part of the input, and positional embeddings that represent the order of tokens in a sequence. In ViTs, images are represented as sequences, where the label function as a learnable token for classification. The input image is divided into a sequence of patches that are flattened and linearly embedded into a vector. The spatial information is preserved by adding positional encodings to the embeddings. The resulting sequence is fed into a transformer decoder identical to that introduced in \cite{vaswani2023attentionneed} to model global relations for classification.
 
 \subsection{Loss Functions}
-Loss functions are a fundamental component in deep learning, as they serve as a measure of how much the model predictions deviate from the ground truth \cite{zhang2023dive}.
+Loss functions are a fundamental component in deep learning, as they serve as a measure of how much the model predictions deviate from the ground truth \cite{zhang2023dive}, guiding optimization. The Binary Cross-Entropy loss is a common choice for multi-label classification for a fully observed data point $(\mathbf{x}_n,\mathbf{y}_n)$ \cite{mlsp}. 
 
 \paragraph{Binary Cross-Entropy}
 
@@ -175,10 +175,10 @@ Loss functions are a fundamental component in deep learning, as they serve as a 
 \paragraph{Online Estimation of Unobserved Labels (ROLE)}
 
 \begin{equation}
-    \mathcal{L}_{ROLE}(\bm{F}_B, \bm{\tilde{Y}}_B) = \frac{\mathcal{L}'(\bm{F}_B)|\bm{\tilde{Y}}+\mathcal{L}'(\bm{\tilde{Y}}|\bm{F}_B)}{2}
+    \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B)|\mathbf{\tilde{Y}}+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
 \end{equation}
 
-for a batch $B$, where $\bm{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\bm{F}\in[0,1]^{N\times L}$ is the matrix of classifier predictions.
+for a batch $B$, where $\mathbf{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times L}$ is the matrix of classifier predictions.
 
 The goal is to train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$
 
