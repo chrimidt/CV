@@ -80,6 +80,12 @@ This project focuses on testing existing solutions to two common issues that ari
 % ======================== Problem Overview ========================
 \section{Problem Overview}
 
+\subsection{Challenges in Multi-Label Learning}
+\paragraph{Label Correlation}
+\paragraph{Class Imbalance}
+\paragraph{Sparse Supervision}
+
+
 \subsection{Related Work}
 Multi-label learning is a well studied problem within computer vision \cite{mlsp}. 
 
@@ -95,27 +101,22 @@ Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Be
 Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite{Li_2003}.
 
 \paragraph{Partially Observed Labels}
+% Learning a Deep ConvNet for Multi-label Classification with Partial Labels https://arxiv.org/pdf/1902.09720
 
 \paragraph{Heuristics}
 Heuristics can be used to reduce the required
 annotation effort [34, 18], but this runs the risk of increasing
 error in the labels \cite{mlsp}.
+
 % ======================== Theoretical Background ========================
-
 \section{Background}
+This section describes relevant background theory related to the project and methods from MLSPL and Query2Label. Beginning with the definition of multi-label learning, followed by deep neural network architectures used to solve multi-label slassification tasks, and, finally, loss functions as they can handle challenges of label imbalance tasks.
+
+\subsection{Multi-Label Learning}
 Contrary to binary or multi-class classification where each instance is associated with only one label, multi-label classification allows assigning multiple labels to a single input \cite{mlsp}. Given $K$ categories, an input image $x\in \mathcal{X}$ is associated with a binary vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
-
-\subsection{Challenges in Multi-Label Learning}
-\paragraph{Label Correlation}
-\paragraph{Class Imbalance}
-\paragraph{Sparse Supervision}
-
-
 
 \subsection{Convolutional Neural Networks (CNNs)}
 In the field of computer vision there exists different deep learning methods that extract features from input images, and the two main neural networks are convolutional neural networks and vision transformers. 
-
-
 
 \subsection{Transformer Architectures}
 Transformers, introduced by Vaswani et al. \cite{vaswani2023attentionneed}, are a type of neural network architecture initially developed to model long-range dependencies in sequence data. They achieve this using attention and self-attention mechanisms, which enables the model to have a long-term memory of inputs, and dynamically weigh the importance of each element in the input sequence. Originally, transformer-based models was mainly delevoped for natural language processing tasks, but the introduction of the Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, transformers have been widely used for computer vision tasks. 
@@ -165,7 +166,10 @@ The Vision Transformer (ViT), introduced by Dosovitskiy et al. \cite{dosovitskiy
 Loss functions are a fundamental component in deep learning, as they serve as a measure of how much the model predictions deviate from the ground truth \cite{zhang2023dive}.
 
 \paragraph{Binary Cross-Entropy}
+
+
 \paragraph{Focal Loss}
+
 \paragraph{Assymetric Loss}
 
 \paragraph{Online Estimation of Unobserved Labels (ROLE)}
