@@ -14,6 +14,7 @@
 \usepackage{balance}
 \usepackage{booktabs}
 \usepackage{bm}
+\usepackage{bbm}
 
 
 
@@ -152,12 +153,26 @@ Each layer in the Transformer also includes a fully connected feed-forward netwo
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, is a model for image classification that leverages the transformer architecture: the self-attention mechanism of transformers that allows the model to selectively weigh the significance of each part of the input, and positional embeddings that represent the order of tokens in a sequence. In ViTs, images are represented as sequences, where the label function as a learnable token for classification. The input image is divided into a sequence of patches that are flattened and linearly embedded into a vector. The spatial information is preserved by adding positional encodings to the embeddings. The resulting sequence is fed into a transformer decoder identical to that introduced in \cite{vaswani2023attentionneed} to model global relations for classification.
 
 \subsection{Loss Functions}
-Loss functions are a fundamental component in deep learning as they serve as a measure of how much the model predictions deviate from the ground truth, guiding optimization of the network \cite{zhang2023dive}. This section describes some of the common loss functions used in multi-label learning, beginning with the Binary Cross-Entropy (BCE) loss.
+Loss functions are a fundamental component in deep learning as they serve as a measure of how much the model predictions deviate from the ground truth, guiding optimization of the network \cite{zhang2023dive}. In the context of multi-label learning, each instance can belong to multiple classes simumtaneously, and selecting an appropriate loss function is crucial. This section aims to decribe different loss functions employed in multi-label classification, and how they can be used to solve common issues in multi-label learning.
 
 \paragraph{Binary Cross-Entropy (BCE)}
-The BCE loss is a common choice for multi-label classification for a fully observed data point $(\mathbf{x}_n,\mathbf{y}_n)$ \cite{mlsp}, as it's purpose is to classify data into one of two possible categories, negative or positive, represented as 0 and 1. 
+Due to its effectiveness in handling binary decisions for each class, a common choice of loss function for multi-label classification is the The Binary Cross-Entropy (BCE) loss \cite{mlsp,durand2019learningdeepconvnetmultilabel,nayan2024binary}. In binary classification, the goal is to classify data as either positive or negative, represented as 0 or 1. The output of the model is a probability score between 0 and 1, indicating the probability of the input belonging to the positive class \cite{nayan2024binary}.
+
+The BCE loss for multi-label classification is given by:
+
+\begin{equation}
+\begin{aligned}
+\mathcal{L}_{\text{BCE}} = -\frac{1}{K} \sum_{i=1}^{K} \bigl[ &y_i\log(p_i) \\
++ &(1-y_i)\log(1 - p_i) \bigr]
+\end{aligned}
+\end{equation}
+
+\noindent where $K$ is the number of categories, $y_i\in[0,1]$ is the binary label, and $p_i$ is the predicted probability.
+
+However, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tend to focus on the majority class and perform poorly on the minority class. This is a common issue in multi-label learning, hence the need to improve the loss function \cite{Query2Label}.
 
 \paragraph{Focal Loss}
+
 
 \paragraph{Assymetric Loss}
 
@@ -197,7 +212,8 @@ Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label
 
 \subsection{Multi-Label Learning from Single Positive Labels}
 Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{mlsp}.
-How it uses weak supervision and contrastive learning.
+
+The authors' solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
 
 % ======================== Experimental Setup  ========================
 
