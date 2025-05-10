@@ -66,7 +66,7 @@ classification, deep learning for MLC.
 
 Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. 
 
-In this project we investigate methods aimed to solve two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision, which is often the case for data.
+In this project we investigate methods aimed to solve two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision.
 
 
 \subsection{Problem Overview}
@@ -169,22 +169,15 @@ The BCE loss for multi-label classification is given by:
 
 \noindent where $K$ is the number of categories, $y_i\in[0,1]$ is the binary label, and $p_i$ is the predicted probability.
 
-However, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tend to focus on the majority class and perform poorly on the minority class. This is a common issue in multi-label learning, hence the need to improve the loss function \cite{Query2Label}.
+However, BCE assumes that each training example indicates the presence or absence of each class, e.i. the example is fully observable. In the case where labels are only partially observed, the assumption of full negative labeling can lead to false negatives when applying the BCE loss. The authors of MLSPL seek to find a solution to this problem. 
+
+Additionally, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tend to focus on the majority class and perform poorly on the minority class. 
 
 \paragraph{Focal Loss}
 
-
 \paragraph{Assymetric Loss}
 
-\paragraph{Online Estimation of Unobserved Labels (ROLE)}
 
-\begin{equation}
-    \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B)|\mathbf{\tilde{Y}}+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
-\end{equation}
-
-for a batch $B$, where $\mathbf{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times L}$ is the matrix of classifier predictions.
-
-The goal is to train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$
 
 
 
@@ -214,6 +207,16 @@ Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label
 Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{mlsp}.
 
 The authors' solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
+
+\paragraph{Online Estimation of Unobserved Labels (ROLE)}
+
+\begin{equation}
+    \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B)|\mathbf{\tilde{Y}}+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
+\end{equation}
+
+for a batch $B$, where $\mathbf{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times L}$ is the matrix of classifier predictions.
+
+The goal is to train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$
 
 % ======================== Experimental Setup  ========================
 
