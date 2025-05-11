@@ -273,18 +273,7 @@ To convert into a single positive label format, the instructions provided by Col
 
 \subsection{Evaluation Metrics}
 To asses model performance, we adopt mean Average Precision (mAP), a standard metric widely reported in multi-label classification tasks as it is used to analyze the performance object detection and segmentation. Both Query2Label and MLSPL report results in terms of mAP. 
-
-% ======================== Results and Discussion ========================
-
-\section{Results and Discussion}
-
-This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
-
-
-\subsection{Results from Query2Label}
-The results from our experiments are compared to those of the paper in table \ref{tab:q2l_map_comparison}. 
-
-\begin{table*}[!t]
+\begin{table*}[t]
     \small
     \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
     \label{tab:q2l_map_comparison}
@@ -301,10 +290,22 @@ The results from our experiments are compared to those of the paper in table \re
     \end{tabular}
 \end{table*}
 
+% ======================== Results and Discussion ========================
+
+\section{Results and Discussion}
+
+This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
+
+
+\subsection{Results from Query2Label}
+The results from our experiments are compared to those of the paper in table \ref{tab:q2l_map_comparison}. 
+
+
 
 \subsection{Results from Multi-Label Learning from Single Positive Labels}
+The results from our experiments are compared to those of the paper in table \ref{tab:MLSPL_map_comparison}. 
 
-\begin{table}[!t]
+\begin{table}[h]
     \small
     \caption{Comparison of mAP results from our experiments and the reported results on Multi-Label Learning from Single Positive Labels on the MS-COCO 2014 Dataset.}
     \label{tab:MLSPL_map_comparison}
@@ -313,15 +314,20 @@ The results from our experiments are compared to those of the paper in table \re
     \toprule
     \textbf{Loss} & \textbf{Method} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
     \midrule
-    $\mathcal{L}_{ROLE}$ & Linear & 84.9 & 84.9 \\
-    $\mathcal{L}_{ROLE}$ & Fine-Tuned & 84.9 & 84.9 \\
+    $\mathcal{L}_{ROLE}$ & Linear & 66.3 & 66.3 \\
+    $\mathcal{L}_{ROLE}$ & Fine-Tuned & 66.9 & 66.3 \\
     \bottomrule
     \end{tabular}
 \end{table}
 
+Linear: batchsize: 16, lr: 0.001. Validation set variant: clean. Seed 1200. Train set variant: observed. Arch: linear.
+Finte-tuned: Batchsize: 16, lr: 0.00001 on the fine-tuned. Validation set variant: clean. Seed 1200. Train set variant: observed. Arch: resnet50.
+
 % ======================== Conclusion ========================
 
 \section{Conclusion}
+
+Conclusion here.
 % [] Summarize findings for each method.
 
 % [] Mention if the results reproduced align with the papers.
