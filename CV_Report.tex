@@ -233,25 +233,31 @@ Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{ml
 
 The authors' solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
 
-\paragraph{Online Estimation of Unobserved Labels (ROLE)}
 
 
 
 % ======================== Experimental Setup  ========================
 
 \section{Experiments}
-A description of our setup versus the author's setups.
-
-\vspace{1em}
-
-All experiments were run on a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
+All experiments were conducted on a cluster with Ubuntu 22.04.5 LTS, a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
 
 \subsection{Dataset}
 The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/coco_grid.png}
+    \caption{Examples from the MS-COCO 2014 training set, resized to $448 \times 448$ pixels.}
+    \label{fig:coco-examples}
+\end{figure}
+
+
 \subsection{Query2Label}
 All Query2Label experiments were conducted on environment versions cuda==12.4, torch==2.1.0+cu121, torchvision==0.16.0+cu121, python==3.11.8.
-We evaluated the Query2Label model using the best performing backbone model, the CvT-w24 backbone, with a $384\time 384$ input resolution, pretrained on the ImageNet-22k dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used a pretrained model checkpoint released by the authors, which was trained on the MS-COCO 2024 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
+We evaluated the Query2Label model on the four backbone architectures: ResNet-101 with a resolution of $448\times 448$, ResNet-101 with a resolution of $576\times 576$, Swin-L(22k) and CvT-w24(22k), both with a resolution of $384\times 384$ and pre-trained on ImageNet-22k \cite{imagenet} dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used pretrained model checkpoints released by the authors, trained on the MS-COCO 2014 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
+
+\paragraph{Limitations}
+Due to limited time, it was not possible to train the model from scratch, hence why we used pretrained weights to conduct the experiments on the Query2Label method.
 
 % \paragraph{Data preparation}
 % \paragraph{Hyperparameters}
@@ -271,9 +277,16 @@ To asses model performance, we adopt mean Average Precision (mAP), a standard me
 % ======================== Results and Discussion ========================
 
 \section{Results and Discussion}
+
+This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
+
+
+\subsection{Results from Query2Label}
+The results from our experiments are compared to those of the paper in table \ref{tab:q2l_map_comparison}. 
+
 \begin{table*}[!t]
     \small
-    \caption{Comparison of mAP results retween our experiments and reported mAP results on the MS-COCO 2014 Dataset.}
+    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
     \label{tab:q2l_map_comparison}
     \centering
     \begin{tabular}{l l l c c}
@@ -288,13 +301,23 @@ To asses model performance, we adopt mean Average Precision (mAP), a standard me
     \end{tabular}
 \end{table*}
 
-This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
-
-
-\subsection{Results from Query2Label}
-The results from our experiments are compared to those of the paper in table \ref{tab:q2l_map_comparison}. 
 
 \subsection{Results from Multi-Label Learning from Single Positive Labels}
+
+\begin{table}[!t]
+    \small
+    \caption{Comparison of mAP results from our experiments and the reported results on Multi-Label Learning from Single Positive Labels on the MS-COCO 2014 Dataset.}
+    \label{tab:MLSPL_map_comparison}
+    \centering
+    \begin{tabular}{l l c c}
+    \toprule
+    \textbf{Loss} & \textbf{Method} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
+    \midrule
+    $\mathcal{L}_{ROLE}$ & Linear & 84.9 & 84.9 \\
+    $\mathcal{L}_{ROLE}$ & Fine-Tuned & 84.9 & 84.9 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
 
 % ======================== Conclusion ========================
 
