@@ -302,9 +302,7 @@ The dataset preparation for the MS-COCO dataset in MLSPL relies on converting th
 To convert into a single positive label format, the instructions provided by the authors are followed: firsly, both images and annotations for training and validation are downloaded. Secondly, pre-extracted features for COCO, provided by the authors are downloaded. Lastly, the script \texttt{format\_coco.py} is used to produce uniformly formatted image lists and labels. 
 
 \paragraph{Training}
-The authors conduct multiple experiments on four different multi-label classification dataset, however, this project only reproduces the experiments conducted on the MS-COCO 2014 dataset. Results are reported on both (i) linear classification on fixed features and (ii) end-to-end fine-tuning. For each method, a search for hyperparameters were conducted, and results are reported for hyperparameters with the mAP. 
-
-
+The authors conduct multiple experiments on four different multi-label classification dataset, however, this project only reproduces the experiments conducted on the MS-COCO 2014 dataset. Results are reported on both (i) linear classification on fixed features and (ii) end-to-end fine-tuning. For each method, a search for hyperparameters were conducted, and results are reported for hyperparameters with the mAP. In replicating their experiments, we conduct hyperparameter search as well, considering the same learning rates $\{1e-2, 1e-3, 1e-4, 1e-5\}$ and batch sizes $\{8, 16\}$ as the authors, and train the linear classifier for 25 epochs and the fine-tuned for 10 epochs. 
 
 
 
