@@ -15,6 +15,7 @@
 \usepackage{booktabs}
 \usepackage{bm}
 \usepackage{bbm}
+\usepackage{float}
 
 
 
@@ -169,7 +170,7 @@ The BCE loss for multi-label classification is given by:
 
 \noindent where $K$ is the number of categories, $y_i\in[0,1]$ is the binary label, and $p_i$ is the predicted probability.
 
-However, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tend to focus on the majority class and perform poorly on the minority class. 
+Due is its popularity in multi-class classification the BCE loss is used as a benchmark for model performance in \cite{mlsp}. However, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tend to focus on the majority class and perform poorly on the minority class. 
 
 \paragraph{Loss Functions for the Partially Observed Labels Setting}
 BCE assumes that each training example indicates the presence or absence of each class, e.i. the example is fully observable. In real-world multi-label datasets, it is often infeasible to annotate all relevant labels for each image, resulting in partially observed labels. In the case where labels are only partially observed, the assumption of full negative labeling in BCE can lead to false negatives during training, degrading model performance \cite{mlsp}. 
@@ -245,6 +246,23 @@ MLSPL's solution to a sparsely annotated training dataset is twofold: first, the
 
 % ======================== Experimental Setup  ========================
 
+\begin{table*}[t]
+    \small
+    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
+    \label{tab:q2l_map_comparison}
+    \centering
+    \begin{tabular}{l l l c c}
+    \toprule
+    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
+    \midrule
+    Q2L-R101-448 & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
+    Q2L-R101-576 & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
+    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
+    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
+    \bottomrule
+    \end{tabular}
+\end{table*}
+
 \section{Experiments}
 All experiments were conducted on a cluster with Ubuntu 22.04.5 LTS, a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
 
@@ -258,6 +276,8 @@ The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation bot
     \label{fig:coco-examples}
 \end{figure}
 
+\subsection{Evaluation Metrics}
+To asses model performance, we adopt mean Average Precision (mAP), a standard metric widely reported in multi-label classification tasks as it is used to analyze the performance on object detection and segmentation. Both Query2Label and MLSPL report results in terms of mAP. 
 
 \subsection{Query2Label}
 All Query2Label experiments were conducted using Python 3.11.8, with the environment configured with CUDA 12.4, PyTorch 2.1.0+cu121, and Torchvision 0.16.0+cu121.
@@ -279,30 +299,14 @@ All MLSPL experiments were conducted using Python 3.11.8, with the environment c
 \paragraph{Data preparation}
 The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}. Importantly, the same label set is used for all comparisons, meaning that each image will keep the same single positive label throughout training. Furthermore, 20\% of the training dataset is without for validation. Both validation and test sets are fully labeled.
 
-To convert into a single positive label format, the instructions provided by Cole et al. are followed: firsly, both images and annotations for training and validation are downloaded. Secondly, pre-extracted features for COCO, provided by the authors are downloaded. Lastly, the script \texttt{format\_coco.py} is used to produce uniformly formatted image lists and labels.
+To convert into a single positive label format, the instructions provided by the authors are followed: firsly, both images and annotations for training and validation are downloaded. Secondly, pre-extracted features for COCO, provided by the authors are downloaded. Lastly, the script \texttt{format\_coco.py} is used to produce uniformly formatted image lists and labels. 
 
 \paragraph{Training}
+The authors conduct multiple experiments on four different multi-label classification dataset, however, this project only reproduces the experiments conducted on the MS-COCO 2014 dataset. Results are reported on both (i) linear classification on fixed features and (ii) end-to-end fine-tuning. For each method, a search for hyperparameters were conducted, and results are reported for hyperparameters with the mAP. 
 
-\paragraph{Hyperparameters}
 
-\subsection{Evaluation Metrics}
-To asses model performance, we adopt mean Average Precision (mAP), a standard metric widely reported in multi-label classification tasks as it is used to analyze the performance object detection and segmentation. Both Query2Label and MLSPL report results in terms of mAP. 
-\begin{table*}[t]
-    \small
-    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
-    \label{tab:q2l_map_comparison}
-    \centering
-    \begin{tabular}{l l l c c}
-    \toprule
-    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
-    \midrule
-    Q2L-R101-448 & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
-    Q2L-R101-576 & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
-    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
-    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
-    \bottomrule
-    \end{tabular}
-\end{table*}
+
+
 
 % ======================== Results and Discussion ========================
 
@@ -319,7 +323,7 @@ The results from our experiments are compared to those of the paper in table \re
 \subsection{Results from Multi-Label Learning from Single Positive Labels}
 The results from our experiments are compared to those of the paper in table \ref{tab:MLSPL_map_comparison}. 
 
-\begin{table}[h]
+\begin{table}[H]
     \small
     \caption{Comparison of mAP results from our experiments and the reported results on Multi-Label Learning from Single Positive Labels on the MS-COCO 2014 Dataset.}
     \label{tab:MLSPL_map_comparison}
