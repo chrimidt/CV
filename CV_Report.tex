@@ -176,20 +176,24 @@ BCE assumes that each training example indicates the presence or absence of each
 
 To address this issue, several loss functions have been proposed to handle partial supervision. In this project, we explore the case of minimal supervision: the single positive label setting, where only one relevant class label is observed per image and the rest are unannotated. 
 
-\paragraph{Loss Functions for the Single Positive Label Setting}
-In the single positive label setting, traditional loss functions such as BCE and its naive adaptations are insufficient, as they rely on the assumption that unobserved labels are negatives. This leads to a high rate of false negatives, especially when only one positive label per image is observed. Several variants have been proposed to mitigate this, including the Assume Negative loss, Weak Assume Negative loss, and Expected Positive Regularization. While these approaches relax the assumptions on the unobserved labels, they still depend on fixed heuristics.
+Several loss functions have been proposed to mitigate the issue of false negatives, including the Assume Negative loss, Weak Assume Negative loss, and Expected Positive Regularization, all covered in \cite{mlsp}. While these approaches relax the assumptions on the unobserved labels, they still depend on fixed heuristics.
 
-To address these limitations, the authors of \cite{mlsp} propose a more flexible and data-driven approach: Regularized Online Label Estimation (ROLE). This method jointly learns the classifier and a dynamic label estimator, which maintains soft estimates of the full label vector during training. The key insight is that by encouraging consistency between predictions, known labels, and an expected number of positives per image, the model can recover many of the unobserved true labels.
+To address these limitations, the authors of \cite{mlsp} propose Regularized Online Label Estimation (ROLE). This method jointly learns the classifier and a label estimator, which maintains soft estimates of the full label vector during training, meaning that ROLE assumes unobserved labels of a probability between 1 and 0. By encouraging consistency between predictions, known labels, and an expected number of positive labels per image, the model can recover many of the unobserved true labels.
 
 \paragraph{Regularized Online Label Estimation (ROLE)}
-ROLE introduces a second network (or parameter matrix) to estimate the unobserved labels online during training. These soft label estimates are updated alongside the main classifier using a bi-level optimization procedure, where each component reinforces the other. The training objective is composed of three terms:
-\begin{itemize}
-\item A binary cross-entropy loss between model predictions and estimated labels.
-\item A BCE loss over observed positive labels (like in AN).
-\item A regularization term that constrains the number of predicted positives per image to match a predefined expected count $k$.
-\end{itemize}
+ROLE introduces a second network to estimate the unobserved labels online during training. These soft label estimates are updated alongside the main classifier using a joint optimization procedure, where the two components reinforce eachother. 
 
-The ROLE loss is given by:
+% The training objective is composed of three terms:
+
+% \begin{itemize}
+% \item A binary cross-entropy loss between model predictions and estimated labels.
+% \item A BCE loss over observed positive labels (like in AN).
+% \item A regularization term that constrains the number of predicted positives per image to match a predefined expected count $k$.
+% \end{itemize}
+
+
+
+\noindent The ROLE loss is given by:
 
 \begin{equation}
     \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B)|\mathbf{\tilde{Y}}+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
@@ -199,7 +203,7 @@ The ROLE loss is given by:
 
 % The goal is to train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$
 
-By refining the label estimates online and regularizing their distribution, ROLE significantly improves robustness to missing labels and has been shown to match or even outperform some fully supervised baselines under extreme label sparsity.
+% By refining the label estimates online and regularizing their distribution, ROLE significantly improves robustness to missing labels and has been shown to match or even outperform some fully supervised baselines under extreme label sparsity.
 
 % \paragraph{Focal Loss}
 
@@ -229,11 +233,14 @@ A brief description of what we did to solve the multi-label classification probl
 Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
 
 \subsection{Multi-Label Learning from Single Positive Labels}
-Multi-Label Learning from Single Positive Labels (MLSPL) by Cole et al. \cite{mlsp}.
+MLSPL's solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
 
-The authors' solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
-
-
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/mlsp_fig2.png}
+    \caption{Figure 2 in MLSPL \cite{mlsp}. The distribution of predicted probabilities for unobserved positives when training with a single positive per image for COCO.}
+    \label{fig:mlsp_fig2}
+\end{figure}
 
 
 % ======================== Experimental Setup  ========================
@@ -253,7 +260,11 @@ The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation bot
 
 
 \subsection{Query2Label}
-All Query2Label experiments were conducted on environment versions cuda==12.4, torch==2.1.0+cu121, torchvision==0.16.0+cu121, python==3.11.8.
+All Query2Label experiments were conducted using Python 3.11.8, with the environment configured with CUDA 12.4, PyTorch 2.1.0+cu121, and Torchvision 0.16.0+cu121.
+
+\paragraph{Data preparation}
+
+\paragraph{Training}
 We evaluated the Query2Label model on the four backbone architectures: ResNet-101 with a resolution of $448\times 448$, ResNet-101 with a resolution of $576\times 576$, Swin-L(22k) and CvT-w24(22k), both with a resolution of $384\times 384$ and pre-trained on ImageNet-22k \cite{imagenet} dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used pretrained model checkpoints released by the authors, trained on the MS-COCO 2014 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
 
 \paragraph{Limitations}
@@ -263,11 +274,14 @@ Due to limited time, it was not possible to train the model from scratch, hence 
 % \paragraph{Hyperparameters}
 
 \subsection{Multi-Label Learning from Single Positive Labels}
-All MLSPL experiments were conducted on environment versions cuda==12.4, torch==2.2.1+cu121, torchvision==0.17.1+cu121, python==3.11.8.
+All MLSPL experiments were conducted using Python 3.11.8, with the environment configures with CUDA 12.4, PyTorch 2.2.1+cu121, and Torchvision 0.17.1+cu121.
+
 \paragraph{Data preparation}
-The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}.
+The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}. Importantly, the same label set is used for all comparisons, meaning that each image will keep the same single positive label throughout training. Furthermore, 20\% of the training dataset is without for validation. Both validation and test sets are fully labeled.
 
 To convert into a single positive label format, the instructions provided by Cole et al. are followed: firsly, both images and annotations for training and validation are downloaded. Secondly, pre-extracted features for COCO, provided by the authors are downloaded. Lastly, the script \texttt{format\_coco.py} is used to produce uniformly formatted image lists and labels.
+
+\paragraph{Training}
 
 \paragraph{Hyperparameters}
 
