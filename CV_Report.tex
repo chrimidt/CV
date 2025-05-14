@@ -16,6 +16,7 @@
 \usepackage{bm}
 \usepackage{bbm}
 \usepackage{float}
+\usepackage{hyperref}
 
 
 
@@ -259,12 +260,14 @@ MLSPL's solution to a sparsely annotated training dataset is twofold: first, the
     Q2L-R101-576 & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
     Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
     Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
+    Q2L-TresL    & TResNetL       & $448\times448$ & 87.3 & 87.3 \\
+    Q2L-Tres     & TResNetL(22k)  & $448\times448$ & 89.2 & 89.2 \\
     \bottomrule
     \end{tabular}
 \end{table*}
 
 \section{Experiments}
-All experiments were conducted on a cluster with Ubuntu 22.04.5 LTS, a single NVIDIA GeForce RTX 3060 GPU (12 GB VRAM), with Python 3.11.8, NVIDIA driver 550.90.07 and CUDA 12.4. 
+All experiments were conducted on a cluster with access to two NVIDIA GeForce RTX 3060 GPU (12 GB VRAM). The cluster was equipped with Ubuntu 22.04.5 LTS.
 
 \subsection{Dataset}
 The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
@@ -280,36 +283,42 @@ The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation bot
 To asses model performance, we adopt mean Average Precision (mAP), a standard metric widely reported in multi-label classification tasks as it is used to analyze the performance on object detection and segmentation. Both Query2Label and MLSPL report results in terms of mAP. 
 
 \subsection{Query2Label}
-All Query2Label experiments were conducted using Python 3.11.8, with the environment configured with CUDA 12.4, PyTorch 2.1.0+cu121, and Torchvision 0.16.0+cu121.
+All Query2Label experiments were conducted using Python 3.7.3 with PyTorch 1.9.0 and Torchvision 0.10.0, compiled with CUDA 11.1. Due to compatibility issues with the \texttt{inplace\_abn} dependency required by TResNet backbones, we rebuilt the extension from source using commit \texttt{938ffd2} to ensure compatibility with our environment.
+
+Additionally, we encountered a missing dependency for RandAugment, which was not included in the original repository. To address this, we manually added the augmentations.py file from the pytorch-randaugment implementation\footnote{\url{https://github.com/ildoonet/pytorch-randaugment}} and modified the import in get\_dataset.py to use a local version: from .augmentations import RandAugment. We also replaced the default RandAugment() instantiation with RandAugment(n=2, m=9) to explicitly set the parameters. While a similar implementation exists in the torchvision.transforms module\footnote{\url{https://pytorch.org/vision/main/generated/torchvision.transforms.RandAugment.html}}, it is incompatible with the version of torchvision used in this project.
 
 \paragraph{Data preparation}
+While the original work includes experiments on five datasets, our reproduction is limited to the MS-COCO 2014 dataset. The model was evaluated on the MS-COCO 2014 dataset. All images were resized to match the input resolution required by each respective backbone. Label annotations for each image were preserved in their multi-label format.
 
 \paragraph{Training}
-We evaluated the Query2Label model on the four backbone architectures: ResNet-101 with a resolution of $448\times 448$, ResNet-101 with a resolution of $576\times 576$, Swin-L(22k) and CvT-w24(22k), both with a resolution of $384\times 384$ and pre-trained on ImageNet-22k \cite{imagenet} dataset, as described by Liu et al. \cite{Query2Label}. For our experiments, we used pretrained model checkpoints released by the authors, trained on the MS-COCO 2014 dataset. The model was tested on the MS-COCO 2024 validation set with a batchsize of 16 and otherwise no fine-tuning or modification.
+Attempts to train Query2Label with the CvT-w24 backbone failed due to memory limitations of the available 12GB GPUs. However, due to time constraints, we did not replicate the original training procedure using our own setup, and only tested if training was possible with the limited memory availability, and instead, we relied on the publicly released pretrained models provided by the authors. The Query2Label framework was evaluated using four backbone configurations: ResNet-101 at resolutions of $448\times448$ and $576\times576$, as well as Swin-L(22k) and CvT-w24(22k) at $384\times384$, both pretrained on the ImageNet-22k \cite{imagenet} dataset. These models were originally trained on the MS-COCO 2014 training set and evaluated in our experiments on the MS-COCO 2014 validation set. We used a batch size of 16 and made no further modifications or fine-tuning.
 
-\paragraph{Limitations}
-Due to limited time, it was not possible to train the model from scratch, hence why we used pretrained weights to conduct the experiments on the Query2Label method.
+We tested training the Query2Label model from scratch using the ResNet-101 backbone. Distributed training was enabled to leverage both GPUs. Training was conducted with a batch size of 8, chosen to fit within the memory constraints of the GPUs. The model was optimized using AdamW with a learning rate of $10^{-4}$, weight decay of $10^{-2}$, and trained for 80 epochs with early stopping enabled. Data augmentation included random cutout with one hole and a cut factor of 0.5. Four data loading workers were used per process. No modifications were made to the original model architecture or loss design.
 
-% \paragraph{Data preparation}
-% \paragraph{Hyperparameters}
 
 \subsection{Multi-Label Learning from Single Positive Labels}
-All MLSPL experiments were conducted using Python 3.11.8, with the environment configures with CUDA 12.4, PyTorch 2.2.1+cu121, and Torchvision 0.17.1+cu121.
+The original implementation was developed with older library versions, specifically PyTorch 1.7.0+cu110, and Torchvision 0.8.1+cu110. In contrast, our reproduction was conducted using PyTorch 2.2.1+cu121, and Torchvision 0.17.1+cu121. The original implementation had unknown versions of Python and CUDA, whereas our experiments were conducted using python 3.11.8 and CUDA 12.4. Despite keeping the code unchanged, and using the original random seed, differences in default behavior between library versions may cause deviations in results. Nevertheless, all code ran without modification, and we verified that training and evaluation completed successfully.
+
+Although two GPUs were available on the system, only a single GPU was utilized during training to maintain consistency and reproducibility of the results.
 
 \paragraph{Data preparation}
-The dataset preparation for the MS-COCO dataset in MLSPL relies on converting the standard multi-label MS-COCO dataset to a single positive label format, simulating a weakly supervised setting. Cole et al. does this beginning with the fully annotated multi-label image dataset and corrupt it by discarding annotations, simulating single positive training data by randomly selecting one positive label for each training example \cite{mlsp}. Importantly, the same label set is used for all comparisons, meaning that each image will keep the same single positive label throughout training. Furthermore, 20\% of the training dataset is without for validation. Both validation and test sets are fully labeled.
+While the original work includes experiments on four datasets, our reproduction is limited to the MS-COCO 2014 dataset. The COCO dataset was converted to a single-positive label format to simulate a weakly supervised setting. Following Cole et al.~\cite{mlsp}, this was done by starting with the fully annotated multi-label dataset and corrupting it by discarding all but one randomly selected positive label per image. Importantly, the same selected label is consistently used throughout training to ensure fair comparisons across methods. Additionally, 20\% of the training data was set aside for validation. Both the validation and test sets remain fully labeled.
 
-To convert into a single positive label format, the instructions provided by the authors are followed: firsly, both images and annotations for training and validation are downloaded. Secondly, pre-extracted features for COCO, provided by the authors are downloaded. Lastly, the script \texttt{format\_coco.py} is used to produce uniformly formatted image lists and labels. 
+To prepare the data, we followed the authors' instructions: first, the standard COCO 2014 training and validation images and annotations were downloaded. Next, we obtained the pre-extracted features provided by the authors. Finally, the \texttt{format\_coco.py} script was used to produce uniformly formatted image lists and corresponding labels.
+
 
 \paragraph{Training}
-The authors conduct multiple experiments on four different multi-label classification dataset, however, this project only reproduces the experiments conducted on the MS-COCO 2014 dataset. Results are reported on both (i) linear classification on fixed features and (ii) end-to-end fine-tuning. For each method, a search for hyperparameters were conducted, and results are reported for hyperparameters with the mAP. In replicating their experiments, we conduct hyperparameter search as well, considering the same learning rates $\{1e-2, 1e-3, 1e-4, 1e-5\}$ and batch sizes $\{8, 16\}$ as the authors, and train the linear classifier for 25 epochs and the fine-tuned for 10 epochs. 
+Results are reported on two training scenarios: (i) linear classification on fixed features and (ii) end-to-end fine-tuning. For each method, a hyperparameter search was conducted, and results are reported for the configuration achieving the best mean average precision (mAP) on the validation set.
 
+In replicating the experiments, we conducted a similar hyperparameter search, considering learning rates  $\{1e-2, 1e-3, 1e-4, 1e-5\}$ and batch sizes ${8, 16}$. The linear classifier was trained for 25 epochs, and the fine-tuning phase for 10 epochs. The validation set used was the clean variant, meaning it was fully labeled.
 
+\paragraph{Selected Hyperparameters}
+The final results reported for MS-COCO were obtained using the hyperparameters that achieved the highest validation mAP during the search. For the linear classifier, we used a batch size of 16 and a learning rate of 0.001. For the fine-tuned ResNet-50 model, the learning rate was set to 0.00001, with the same batch size of 16.
 
 % ======================== Results and Discussion ========================
 
 \section{Results and Discussion}
-
+\label{sec:results}
 This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
 
 
@@ -336,8 +345,6 @@ The results from our experiments are compared to those of the paper in table \re
     \end{tabular}
 \end{table}
 
-Linear: batchsize: 16, lr: 0.001. Validation set variant: clean. Seed 1200. Train set variant: observed. Arch: linear.
-Finte-tuned: Batchsize: 16, lr: 0.00001 on the fine-tuned. Validation set variant: clean. Seed 1200. Train set variant: observed. Arch: resnet50.
 
 % ======================== Conclusion ========================
 
