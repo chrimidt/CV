@@ -201,19 +201,6 @@ However, this predicts all labels as positive. The solution to this is the intro
 
 where $\lambda$ is a hyperparameter.
 
-% \begin{equation}
-%     k=\mathbb{E}_{(\mathbf{x},\mathbf{y})\sim p_{\text{data}(\mathbf{x},\mathbf{y})}}\sum_{i=1}^{L}\mathds{1}_{[y_i=1]}
-% \end{equation}
-
-% \noindent where $\mathds{1}[\cdot]$ denotes the indicator function, i.e. $\mathds{1}_{[zni=1]} = 1$ if $z_{ni} = 1$, and $0$ otherwise. $k$ can either be estimated from data or treated as a hyperparameter. A matrix $\mathbf{F}_B = [f_{ni}]_{n\in B,i\in\{1,...,L\}}$ is defined to be the predictions $f_{ni}\in[0,1]$ for every image in a batch $B\subset \{1,...,N\}$. The batch predictions a used to compute 
-
-% \begin{equation}
-%     \hat{k}(\mathbf{F}_B) = \frac{\sum_{n\in B}\sum_{i=1}^{L}\mathbf{f}_{ni}}{|B|}\text{.}
-% \end{equation}
-
-% Let $\mathbf{Y}_B = [y_{ni}]_{n\in B,i\in\{1,...,L\}}$ be the matrix of true labels, where perfect predictions would yield $\mathbf{F}_B=\mathbf{Y}_B$. In this case, $\mathbb{E}[\hat{k}(\mathbf{F}_B)]=\mathbb{E}[\hat{k}(\mathbf{Y}_B)]$, naturally leading to $\hat{k}=k$. The EPR loss introduces a regularization term $R_k(\mathbf{F}_B)$ that encourages $\hat{k}$ to be as close to $k$ as possible, penalizing negatives, leading to the EPR loss defined as followed:
-
-
 
 \paragraph{Regularized Online Label Estimation (ROLE)}
 The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisfactory results, and thus propose a combination of $\mathcal{L}_{EPR}$ and a label estimator module that maintains online estimates of the missing labels during training, called Regularized Online Label Estimation (ROLE). This method jointly trains the image classifier and a label estimator subject to constraints imposed by $\mathcal{L}_{EPR}$. This maintains soft estimates of the full label vector during training, resulting in ROLE assuming unobserved labels to have a probability between 1 and 0. For a batch $B$, let $\mathbf{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times L}$ represent the matrix of classifier predictions. The goal is to jointly train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$. An intermediate loss is defined as:
