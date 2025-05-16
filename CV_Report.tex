@@ -46,7 +46,7 @@
 % [] Evaluate the feasibility and performance of each method.
 
 \begin{abstract}
-Abstract goes here.
+Multi-label image classification presents significant challenges due to sparse labeling, label imbalance, and the complexity inherent in real-world image datasets. This paper explores two state-of-the-art methodologies addressing these issues: Query2Label (Q2L), which utilizes transformer architectures and asymmetric focal loss to effectively manage label imbalance and localize discriminative features, and Multi-label Learning from Single Positive Labels (MLSPL), which adapts loss functions and employs novel regularization techniques for scenarios with extremely limited supervision. Both models are evaluated on the MS-COCO 2014 dataset and results are reported in mean average precision (mAP). Results indicate that Q2L achieves state of the art performance with its two-stage architecture and MLSPL proves robust in a weakly supervised setting, effectively tackling the challenge of sparse annotations. Results from our experiments show that the methods investigated in this project obtain the expected results on the COCO dataset. However, training with ViT architecture backbones on Query2Label has shown to be infeasible due to limited memory in our experimental environment, and thus require a setup with increased computational power. Further improvements in multi-label classification models seem likely due to the potential in these architectures and training strategies.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -68,39 +68,54 @@ classification, deep learning for MLC.
 % [] Clarify that the methods are not compared directly, but evaluated independently against the reported baselines.
 
 
-Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. 
+% Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. 
 
-In this project we investigate methods aimed to solve two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision.
+% In this project we investigate methods aimed to solve two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision.
 
 
-\subsection{Problem Overview}
+% \subsection{Problem Overview}
 
-\paragraph{Label Correlation}
-\paragraph{Class Imbalance}
-\paragraph{Sparse Supervision}
+% \paragraph{Label Correlation}
+% \paragraph{Class Imbalance}
+% \paragraph{Sparse Supervision}
 
+
+
+
+Multi-label classification is a supervised classification task in which each instance can be attached with one or more labels. This difference with respect to single-label or multi-class classification, in which each input is assigned a single class, is what fundamentally changes the nature of the problem. In computer vision, images usually have more than one objects or concepts, so multi-label classification is more appropriate for practical applications such as image tagging, autonomous driving and medical diagnosis [reference here].
+However, multi-label classification is not without its hurdles. First, label correlation can lead to performance issues, as labels are not independent — e.g., beach and ocean tend to co-occur [reference here]. Second, the imbalance among classes is very common in the real-word datasets, some categories may occur frequently, while some others may rarely appear, resulting in the model biased toward most categories and ignoring the minority ones. Third, sparse labeling or partial supervision is commonly encountered [reference here]. Full annotation of every image with all the present labels is costly and not always feasible which eventually leads to training data where only a part of the labels are assigned to each image.
+In this work, we study solutions to two fundamental challenges of multi-label learning: (i) learning from sparsely annotated data, namely training from a single positive label per image, and (ii) coping with label imbalance while maintaining the capability of feature localization. We consider two most recent [not most recent?] methods—Query2Label [1] that uses transformer-based architectures and attention to model the dependencies between the labels and MLSPL (Multi-label learning from Single Positive Labels) [2] that introduces the new training strategies and loss functions for weak supervision. We evaluate the proposed models' performance on the MS-COCO 2014 dataset and discuss mAP performance and the capacity for solving the difficulties associated with multi-label image classification.
 
 \section{Related Work}
-Multi-label learning is a well studied problem within computer vision \cite{mlsp}. 
+Multi-label learning has become increasingly sought after in the computer vision research community. There have been several work proposed to enhance the model performance in under label sparsity, class imbalance, and noisy annotations. This section considers related work on loss functions, positive-unlabeled learning, partially observed labels, and attention-based architectures.
 
-% [] Provide a concise review of existing methods in multi-label classification.
+% % [] Provide a concise review of existing methods in multi-label classification.
 
-% [] Include references to transformer-based methods (like Q2L), and weakly supervised learning methods (like MLSPL).
+% % [] Include references to transformer-based methods (like Q2L), and weakly supervised learning methods (like MLSPL).
 
 \paragraph{Loss Functions}
+The loss function is a necessary ingredient of any deep learning model to direct how parmeter should be optimized. Binary Cross-Entropy (BCE) is commonly used for multi-label classification as it is designed to deal with multiple binary targets per sample [2], [3], [4]. However, BCE treat any unobserved label as the negative, and therefore such approach may not always work as expected in the case where supervision is scarce. Various alternative loss functions have been proposed to deal with class imbalance, such as Focal Loss which falls back on easy negatives and Asymmetric Loss which treats negative as seriously as positive.
+To address the issue of label sparsity, Cole et al. introduced the Regularized Online Label Estimation (ROLE) loss. [2]. ROLE co-trains a classifier together with a label estimator to obtain soft labels for unseen categories. By using estimated label vectors and encouraging consistency with known positives and desired label counts, ROLE enables the model to recover the true labels that are not directly annotated during training.
 
 \paragraph{PU learning} 
-Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Bekker_2020}.
+% Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Bekker_2020}.
 
-Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite{Li_2003}.
+The concept of learning from partially labeled samples, in which only positive labels are observed while the others are unknown, is from PU learning. A complete collection of PU learning methods and the corresponding discussions can be found in the survey of Bekker and Davis [5], and the early investigation in text classification is reported in [6]. The proposed approaches operate under the assumption that the missing labels may not be negative, a particularly relevant assumption to multi-label image problems. Transplanting such ideas to the case of vision tasks, theoretical works and practical models have been proposed that can learn from noisy weak-supervision datasets, as in the the MLSPL framework [2].
+
+% Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite{Li_2003}.
 
 \paragraph{Partially Observed Labels}
-% Learning a Deep ConvNet for Multi-label Classification with Partial Labels https://arxiv.org/pdf/1902.09720
+% % Learning a Deep ConvNet for Multi-label Classification with Partial Labels https://arxiv.org/pdf/1902.09720
+In practice, the great Majority of large Datasets are only partially annotated, as full Annotations are often too costly to obtain. Multiple approaches have been proposed to tackle learning from partially observed labels. Heuristic-based approaches [7], [8] minimize annotation effort but add noise and uncertainty. More principled methods, such as ROLE, attempt to predict missing labels in a structured manner. Durand et al. [3] also consider partial labels within the context of deep networks and investigate how the right choice of loss function and architecture can alleviate the problem of false negatives.
 
-\paragraph{Heuristics}
-Heuristics can be used to reduce the required
-annotation effort [34, 18], but this runs the risk of increasing
-error in the labels \cite{mlsp}.
+% \paragraph{Heuristics}
+% Heuristics can be used to reduce the required
+% annotation effort [34, 18], but this runs the risk of increasing
+% error in the labels \cite{mlsp}.
+
+\paragraph{Attention and Transformer Architectures}
+Transformer-based models have also made a recent foray into computer vision after being successful in natural language processing. The Vision Transformer (ViT) (Dosovitskiy et al.) [9], applies self-attention mechanism to patches of the image, allowing global context modeling with convolutions. Based on this, Query2Label [1] introduces a transformer decoder that attends to feature map grids using label queries. This makes the model to simultaneously learn the label dependencies and make predictions in a more structured manner. Through employing cross-attention between label embeddings and visual features, Query2Label circularly learns label correlations and their spatial distributions.
+These results showcase the capability of transformer model and structured learning techniques to enhance multi-label classification, especially when the real-world constraints of sparse labels and unbalanced datasets are considered.
 
 % ======================== Theoretical Background ========================
 \section{Background}
@@ -221,7 +236,17 @@ The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisf
 
 \noindent where both $\mathbf{F}_B$ and $\tilde{\mathbf{Y}}_B$ are updated simultaneously.
 
+\paragraph{Asymmetric focal Loss}
+\label{sec:asfl}
+A simplified version of asymmetric loss function is used by the authors of Q2L [2]. Asymmetric loss is a version of focal loss but with $\gamma$ taking on the value of 0 and 1 for positive and negative values respectively. This loss function effectively addresses the sample imbalance problem by making a distinction between negatives and positives, and focusing on the rarer positive labels while down-weighing the negative samples to prevent them taking over during training. For each training sample the loss is calculated using the following asymmetric focal loss function:
 
+\begin{equation}
+    L = \frac{1}{K} \sum_{k=1}^{K}
+\begin{cases}
+(1 - p_k)^{\gamma^+} \log(p_k), & \text{if } y_k = 1 \\
+(p_k)^{\gamma^-} \log(1 - p_k), & \text{if } y_k = 0
+\end{cases}
+\end{equation}
 
 % ======================== Methodology ========================
 
@@ -257,25 +282,6 @@ MLSPL's solution to a sparsely annotated training dataset is twofold: first, the
 
 
 % ======================== Experimental Setup  ========================
-
-\begin{table*}[t]
-    \small
-    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
-    \label{tab:q2l_map_comparison}
-    \centering
-    \begin{tabular}{l l l c c}
-    \toprule
-    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
-    \midrule
-    Q2L-R101     & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
-    Q2L-R101     & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
-    Q2L-TresL    & TResNetL       & $448\times448$ & 87.3 & 87.3 \\
-    Q2L-Tres     & TResNetL(22k)  & $448\times448$ & 89.2 & 89.2 \\
-    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
-    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
-    \bottomrule
-    \end{tabular}
-\end{table*}
 
 \section{Experiments}
 All experiments were conducted on a cluster with access to two NVIDIA GeForce RTX 3060 GPU (12 GB VRAM). The cluster was equipped with Ubuntu 22.04.5 LTS.
@@ -330,16 +336,35 @@ The final results reported for MS-COCO were obtained using the hyperparameters t
 
 \section{Results and Discussion}
 \label{sec:results}
-This section compares results from the experiments to the those of the papers. Discuss why they might not be the same, or describe the similarities. Discuss whether the methods are able to solve the problems.
+This section presents the findings of our experiments, comparing the reproduced results for Query2Label and MLSPL with those reported in the respective papers. The discussion focuses on whether these methods successfully address the challenges of multi-label classification: feature localization and sparse supervision.
 
 
 \subsection{Results from Query2Label}
-The results from our experiments are compared to those of the paper in table \ref{tab:q2l_map_comparison}. 
+Table \ref{tab:q2l_map_comparison} compares our results with the original Query2Label paper across various backbones. We observe that our reproduced mean average precision (mAP) scores match the original results across all configurations. For example, with a CvT backbone, both our implementation and the original achieved an mAP of 91.3\%.
 
+This consistency demonstrates that the publicly available pretrained models function as intended on our specific hardware configuration. However, attempts to train the model using transformer backbones like CvT-w24 and SwinL failed due to hardware memory limitations. With CNN-based backbones, training was successfully initialized using a reduced batchsize, confirming that the pipeline works under constrained settings. Overall, our experiments show that the Query2Label framework effectively tackles the feature localization under label imbalance, given appropriate computational resources.
 
+\begin{table*}[t]
+    \small
+    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
+    \label{tab:q2l_map_comparison}
+    \centering
+    \begin{tabular}{l l l c c}
+    \toprule
+    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
+    \midrule
+    Q2L-R101     & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
+    Q2L-R101     & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
+    Q2L-TresL    & TResNetL       & $448\times448$ & 87.3 & 87.3 \\
+    Q2L-Tres     & TResNetL(22k)  & $448\times448$ & 89.2 & 89.2 \\
+    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
+    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
+    \bottomrule
+    \end{tabular}
+\end{table*}
 
 \subsection{Results from Multi-Label Learning from Single Positive Labels}
-The results from our experiments are compared to those of the paper in table \ref{tab:MLSPL_map_comparison}. 
+Our implementation of MLSPL also achieved mAP values close to those reported in the original paper. As shown in table \ref{tab:MLSPL_map_comparison}, our linear classifier trained using ROLE loss achieved an mAP of 66.3\%, consistent with the reported baseline. Interestingly, our fine-tuned ROLE model slightly exceeded the original, scoring 66.9\% versus the reported 66.3\%. Discrepancies between our experiments and the original results are minimal and can be attributed to differences in software versions and hardware configurations. Nevertheless, our findings validate the reproducibility and effectiveness of ROLE's joint optimization of classifier and label estimator.
 
 \begin{table}[H]
     \small
@@ -356,17 +381,19 @@ The results from our experiments are compared to those of the paper in table \re
     \end{tabular}
 \end{table}
 
+\subsection{Summary}
+Both Query2Label and MLSPL demonstrate the capacity to address distinct challenges in multi-label learning. Query2Label leverages transformers to encode label dependencies and spatial localization effectively, whereas MLSPL tackles sparse label annotation through loss regularization and online label estimation. Although a direct comparison of the two methods is impossible, a key difference still lies in their computational feasibility. While Query2Label achieves SOTA performance, it requires large-scale memory, whereas MLSPL demands less resources.
+
 
 % ======================== Conclusion ========================
 
 \section{Conclusion}
+Two of the major challenges in multi-label classification problems were examined and evaluated through machine learning models. MLSPL was evaluated in terms of tackling a specific environment in which each training image only has one positive label. Q2L was evaluated as a two-stage framework to achieve a SOTA performance in traditional multi-label classification problems. Each was evaluated on the MS14-COCO dataset. 
+Our experimental results confirmed that both methods performed as expected: Query2Label achieved identical mean average precision scores to those reported in the original paper, validating the publicly released pretrained models. However, we found that training Query2Label with transformer-based backbones requires greater memory resources, demonstrating its practical limitations. Likewise, the batchsizes of the CNN-based backbones were lowered to accommodate for the limited memory.
 
-Conclusion here.
-% [] Summarize findings for each method.
+On the other hand, the implementation of MLSPL ran without resource constraints. Our implementation demonstrated results that slightly outperformed the reported results. This indicates that the ROLE loss is a robust choice that can be implemented with various configurations. 
 
-% [] Mention if the results reproduced align with the papers.
-
-% [] Suggest future directions or improvements.
+Multi-label classification continues to mature as novel training methods and frameworks are discovered and refined.  Innovation in the field multi-label classification shows potential as many recent novelties are introduced and unexplored variants of the classification problems are investigated. 
 
 
 \bibliographystyle{IEEEtran}
