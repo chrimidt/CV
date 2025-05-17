@@ -211,6 +211,7 @@ However, this predicts all labels as positive. The solution to this is the intro
 \noindent The overall loss is:
 
 \begin{equation}
+    \label{eq:epr}
     \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n)+\lambda R_k(\mathbf{F}_B)\text{,}
 \end{equation}
 
@@ -221,16 +222,17 @@ where $\lambda$ is a hyperparameter.
 The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisfactory results, and thus propose a combination of $\mathcal{L}_{EPR}$ and a label estimator module that maintains online estimates of the missing labels during training, called Regularized Online Label Estimation (ROLE). This method jointly trains the image classifier and a label estimator subject to constraints imposed by $\mathcal{L}_{EPR}$. This maintains soft estimates of the full label vector during training, resulting in ROLE assuming unobserved labels to have a probability between 1 and 0. For a batch $B$, let $\mathbf{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times L}$ represent the matrix of classifier predictions. The goal is to jointly train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$. An intermediate loss is defined as:
 
 \begin{equation}
-    \label{eq:mlsp_11}
+    \label{eq:intermediate}
     \begin{aligned}
         \mathcal{L}'(\mathbf{F}_B,\tilde{\mathbf{Y}}_B) &= \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{BCE}(\mathbf{f}_n,\text{sg}(\tilde{\mathbf{y}}_n)) \\
         &+ \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B)\text{,}
     \end{aligned}
 \end{equation}
 
-\noindent where $\text{sg}$ is a stop-gradient. This loss is used to update $\theta$ while keeping $\phi$ fixed. By switching the arguments in Eq.~\ref{eq:mlsp_11}, $\phi$ is updated while keeping $\theta$ fixed. This leads to the final ROLE loss, given by:
+\noindent where $\text{sg}$ is a stop-gradient. This loss is used to update $\theta$ while keeping $\phi$ fixed. By switching the arguments in Eq.~\ref{eq:intermediate}, $\phi$ is updated while keeping $\theta$ fixed. This leads to the final ROLE loss, given by:
 
 \begin{equation}
+    \label{eq:role}
     \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B)|\mathbf{\tilde{Y}}+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
 \end{equation}
 
@@ -253,12 +255,12 @@ Where $y_k$ is a binary indicator of whether sample $x$ contains label $k$. This
 % ======================== Methodology ========================
 
 \section{Method}
-We chose MLSPL as the method for addressing sparse label annotation, and Query2Label as the method addressing feature localization. The multi-label classification dataset benchmark is the MS-COCO 2014. Results are reported in mean Average Precision (mAP). In the following section, the reason behind the chosen methods is outlined, and how each method aims to solve the multi-label learning challenges.
+We chose to investigate the method proposed in MLSPL as the method for addressing sparse label annotation, and Query2Label as the method addressing feature localization. The MS-COCO 2014 was chosen as the multi-label classification becnhmark, as it is widely used in the multi-label learning field. Results are reported in mean Average Precision (mAP). In the following section, the rationale behind the chosen methods is outlined, and how each method aims to solve the multi-label learning challenges.
 
 
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 \label{sec:q2l_method}
-Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. 
+We selected Query2Label (Q2L) due to its novel use of transformer architectures to address the challenge of localizing discriminative features in multi-label classification, and its reported state-of-the-art results on the COCO dataset.
 
 \begin{figure}[t]
     \centering
@@ -306,15 +308,20 @@ The transformer model solves a crucial challenge, which is the need to extract l
 \end{figure}
 
 \subsection{Multi-Label Learning from Single Positive Labels}
-MLSPL's solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
+We chose to investigate the method proposed my MLSPL as the solution to the challenge of sparse annotation, a common problem in multi-label classification tasks \cite{mlsp}. The MLSPL framework is designed to learn from the case of minimal supervision: only one positive label per image. This approach reports results of up to $88.2\%$ on the VOC12 [reference] dataset, and $69.0$ on the COCO dataset (See Table~\ref{tab:MLSPL_map_comparison}), and thus demonstrates potential to reduce annotation cost significantly.
 
-\begin{figure}[h]
+The authors' solution to this problem lies in the design of the loss function, which combines two key techniques: Expected Positive Regularization (EPR) and Regularized Online Label Estimation (ROLE).
+
+Expected Positive Regularization (EPR) (Eq.~\ref{eq:epr}) introduces a soft constraint on how many positive labels the model should predict per image. This is implemented by penalizing the difference between the predicted number of positives $\hat{k}$ and the an already defined value $k$, thereby avoiding the predicting all labels as postive \cite{mlsp}. ROLE (Eq.~\ref{eq:role}) builds upon EPR by jointly training an image classifier and a label estimator. The label estimator maintains soft predictions for all unobserved labels, and the classifier is trained on a combination of observed and estimated labels. This framework allows the model to recover many of the positive labels.
+
+\begin{figure}[t]
     \centering
     \includegraphics[width=.8\linewidth]{images/mlsp_fig2.png}
-    \caption{Figure 2 in MLSPL \cite{mlsp}. The distribution of predicted probabilities for unobserved positives when training with a single positive per image for COCO.}
+    \caption{The distribution of predicted probabilities for unobserved positives when training with a single positive per image for COCO. Figure from \cite{mlsp}.}
     \label{fig:mlsp_fig2}
 \end{figure}
 
+The effectiveness of ROLE in recovering unobserved labels is illustrated in Figure~\ref{fig:mlsp_fig2}. 
 
 % ======================== Experimental Setup  ========================
 
