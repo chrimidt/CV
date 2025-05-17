@@ -51,7 +51,7 @@ Multi-label image classification presents significant challenges due to sparse l
 
 \begin{IEEEkeywords}
 Multi-label learning, deep learning, computer vision, multi-label
-classification, deep learning for MLC. 
+classification, deep learning for MLC, MS-COCO 2014. 
 
 \end{IEEEkeywords}
 
@@ -59,54 +59,38 @@ classification, deep learning for MLC.
 
 \section{Introduction}
 
-% [] Introduce the multi-label image classification problem and its challenges.
-
-% [] Mention the two methods you investigate.
-
-% [] Explain that your aim is to reproduce the results and evaluate their performance on MS-COCO.
-
-% [] Clarify that the methods are not compared directly, but evaluated independently against the reported baselines.
-
-
-% Multi-label classification is the supervised learning problem where an instance may be associated with multiple labels. Image classification is a computer vision task that requires assigning a label or multiple labels to an image. Single-label classification, or multi-class classification, refers to the problem where an image contains only one object to be identified. However, natural images usually contain multiple objects or concepts, highlighting the importance of multi-label classification \cite{ridnik2021mldecoderscalableversatileclassification}. 
-
-% In this project we investigate methods aimed to solve two common issues that arise when training a network that assigns multiple labels to an input image: (i) the general multi-label learning issue accurately identifying multiple objects in an image under class imbalance, representing the complexity of real-world images, and (ii) the scenario where the training data underwent sparse supervision.
-
-
-% \subsection{Problem Overview}
-
-% \paragraph{Label Correlation}
-% \paragraph{Class Imbalance}
-% \paragraph{Sparse Supervision}
-
-
-
-
 Multi-label classification is a supervised classification task in which each instance can be attached with one or more labels. This difference with respect to single-label or multi-class classification, in which each input is assigned a single class, is what fundamentally changes the nature of the problem. In computer vision, images usually have more than one objects or concepts, so multi-label classification is more appropriate for practical applications such as image tagging, autonomous driving and medical diagnosis [reference here].
-However, multi-label classification is not without its hurdles. First, label correlation can lead to performance issues, as labels are not independent — e.g., beach and ocean tend to co-occur [reference here]. Second, the imbalance among classes is very common in the real-word datasets, some categories may occur frequently, while some others may rarely appear, resulting in the model biased toward most categories and ignoring the minority ones. Third, sparse labeling or partial supervision is commonly encountered [reference here]. Full annotation of every image with all the present labels is costly and not always feasible which eventually leads to training data where only a part of the labels are assigned to each image.
-In this work, we study solutions to two fundamental challenges of multi-label learning: (i) learning from sparsely annotated data, namely training from a single positive label per image, and (ii) coping with label imbalance while maintaining the capability of feature localization. We consider two most recent [not most recent?] methods—Query2Label [1] that uses transformer-based architectures and attention to model the dependencies between the labels and MLSPL (Multi-label learning from Single Positive Labels) [2] that introduces the new training strategies and loss functions for weak supervision. We evaluate the proposed models' performance on the MS-COCO 2014 dataset and discuss mAP performance and the capacity for solving the difficulties associated with multi-label image classification.
+However, multi-label classification is not without its hurdles. Firstly, label correlation can lead to performance issues, as labels are not independent — e.g., beach and ocean tend to co-occur. Second, the imbalance among classes is very common in the real-world datasets, i.e. some categories may occur frequently, while some others may rarely appear, resulting in the model biased toward most categories and ignoring the minority ones. Third, sparse labeling or partial supervision is commonly encountered [reference here]. Full annotation of every image with all the present labels is costly and not always feasible which eventually leads to training data where only a part of the labels are assigned to each image.
+In this work, we study solutions to two fundamental challenges of multi-label learning: (i) learning from sparsely annotated data, namely training from a single positive label per image, and (ii) coping with label imbalance while maintaining the capability of feature localization. 
+
+In computer vision problems in general, Transformers have recently shown a huge potential due to retaining rich spatial information when extracting features in contrast to CNNs discarding information in the convolutional feature map. Therefore, we have chosen to analyse a vision Transformer-based model, which achieves state-of-the-art performance. Query2Label (Q2L) utilizes a two-stage system in which firstly the features are extracted using a backbone network, and in the second stage Transformer encoder-decoder layers are leveraged to pool features using label embeddings as queries. The model learns the label embeddings end-to-end to enhance potential and decrease risk of learning spurious correlations. The state-of-the-art performance together with a novel architecture made this model a likely candidate to investigate. 
+
+Multi-Label Learning from Single Positive Labels (MLSPL) provides a framework to tackle the intrinsic nature of the world being multi-label: scenes typically contain several objects. The challenge of assigning labels when information during training is sparse is explored through this model, which incorporates a novel single positive multi-label loss function that jointly trains the image classifier and estimates missing labels during training. This method is interesting as an efficient method of training multi-label classifiers on images with only a single positive label with minimal supervision could reduce costs of annotating datasets unnecessarily and excessive training. A trade-off in reducing resource costs is worthwhile if the drop in performance is tolerable compared to fully annotated datasets. 
+
+We evaluate the proposed models' performance on the MS-COCO 2014 dataset and discuss mAP performance and the capacity for solving the challenges associated with multi-label image classification.
 
 \section{Related Work}
 Multi-label learning has become increasingly sought after in the computer vision research community. There have been several work proposed to enhance the model performance in under label sparsity, class imbalance, and noisy annotations. This section considers related work on loss functions, positive-unlabeled learning, partially observed labels, and attention-based architectures.
 
-% % [] Provide a concise review of existing methods in multi-label classification.
-
-% % [] Include references to transformer-based methods (like Q2L), and weakly supervised learning methods (like MLSPL).
 
 \paragraph{Loss Functions}
-The loss function is a necessary ingredient of any deep learning model to direct how parmeter should be optimized. Binary Cross-Entropy (BCE) is commonly used for multi-label classification as it is designed to deal with multiple binary targets per sample [2], [3], [4]. However, BCE treat any unobserved label as the negative, and therefore such approach may not always work as expected in the case where supervision is scarce. Various alternative loss functions have been proposed to deal with class imbalance, such as Focal Loss which falls back on easy negatives and Asymmetric Loss which treats negative as seriously as positive.
-To address the issue of label sparsity, Cole et al. introduced the Regularized Online Label Estimation (ROLE) loss. [2]. ROLE co-trains a classifier together with a label estimator to obtain soft labels for unseen categories. By using estimated label vectors and encouraging consistency with known positives and desired label counts, ROLE enables the model to recover the true labels that are not directly annotated during training.
+The loss function is a necessary ingredient of any deep learning model to direct how parmeter should be optimized. Binary Cross-Entropy (BCE) is commonly used for multi-label classification as it is designed to deal with multiple binary targets per sample \cite{mlsp,durand2019learningdeepconvnetmultilabel}. However, BCE treat any unobserved label as the negative, and therefore such approach may not always work as expected in the case where supervision is scarce. Various alternative loss functions have been proposed to deal with class imbalance, such as Focal Loss which falls back on easy negatives and Asymmetric Loss which treats negative as seriously as positive.
+To address the issue of label sparsity, Cole et al. introduced the Regularized Online Label Estimation (ROLE) loss \cite{mlsp}. ROLE co-trains a classifier together with a label estimator to obtain soft labels for unseen categories. By using estimated label vectors and encouraging consistency with known positives and desired label counts, ROLE enables the model to recover the true labels that are not directly annotated during training.
+
+\paragraph{Locating areas of interest}
+Another challenge of multi-label classification is how to select which areas of an input image are interesting and only selecting said areas. Early methods would find proposed regions of interest and then treat them as a single-label classification problem \cite{HCP}. Often the discovered bounding boxes would be coarse or be contaminated with background information. Later works would correlate regions of interest with semantic labels by using a spatial transformer layer followed by a Long Short-Term Memory subsystem for predictions \cite{ltsm}.
+
 
 \paragraph{PU learning} 
 % Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Bekker_2020}.
 
-The concept of learning from partially labeled samples, in which only positive labels are observed while the others are unknown, is from PU learning. A complete collection of PU learning methods and the corresponding discussions can be found in the survey of Bekker and Davis [5], and the early investigation in text classification is reported in [6]. The proposed approaches operate under the assumption that the missing labels may not be negative, a particularly relevant assumption to multi-label image problems. Transplanting such ideas to the case of vision tasks, theoretical works and practical models have been proposed that can learn from noisy weak-supervision datasets, as in the the MLSPL framework [2].
+The concept of learning from partially labeled samples, in which only positive labels are observed while the others are unknown, is from PU learning. A complete collection of PU learning methods and the corresponding discussions can be found in the survey of Bekker and Davis \cite{Bekker_2020}, and the early investigation in text classification is reported in \cite{Li_2003}. The proposed approaches operate under the assumption that the missing labels may not be negative, a particularly relevant assumption to multi-label image problems. Transplanting such ideas to the case of vision tasks, theoretical works and practical models have been proposed that can learn from noisy weak-supervision datasets, as in the the MLSPL framework \cite{mlsp}.
 
 % Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite{Li_2003}.
 
 \paragraph{Partially Observed Labels}
 % % Learning a Deep ConvNet for Multi-label Classification with Partial Labels https://arxiv.org/pdf/1902.09720
-In practice, the great Majority of large Datasets are only partially annotated, as full Annotations are often too costly to obtain. Multiple approaches have been proposed to tackle learning from partially observed labels. Heuristic-based approaches [7], [8] minimize annotation effort but add noise and uncertainty. More principled methods, such as ROLE, attempt to predict missing labels in a structured manner. Durand et al. [3] also consider partial labels within the context of deep networks and investigate how the right choice of loss function and architecture can alleviate the problem of false negatives.
+In practice, the great Majority of large Datasets are only partially annotated, as full Annotations are often too costly to obtain. Multiple approaches have been proposed to tackle learning from partially observed labels. Heuristic-based approaches \cite{mlsp} minimize annotation effort but add noise and uncertainty. More principled methods, such as ROLE, attempt to predict missing labels in a structured manner. Durand et al. \cite{durand2019learningdeepconvnetmultilabel} also consider partial labels within the context of deep networks and investigate how the right choice of loss function and architecture can alleviate the problem of false negatives.
 
 % \paragraph{Heuristics}
 % Heuristics can be used to reduce the required
@@ -114,26 +98,31 @@ In practice, the great Majority of large Datasets are only partially annotated, 
 % error in the labels \cite{mlsp}.
 
 \paragraph{Attention and Transformer Architectures}
-Transformer-based models have also made a recent foray into computer vision after being successful in natural language processing. The Vision Transformer (ViT) (Dosovitskiy et al.) [9], applies self-attention mechanism to patches of the image, allowing global context modeling with convolutions. Based on this, Query2Label [1] introduces a transformer decoder that attends to feature map grids using label queries. This makes the model to simultaneously learn the label dependencies and make predictions in a more structured manner. Through employing cross-attention between label embeddings and visual features, Query2Label circularly learns label correlations and their spatial distributions.
-These results showcase the capability of transformer model and structured learning techniques to enhance multi-label classification, especially when the real-world constraints of sparse labels and unbalanced datasets are considered.
+Transformer-based models have also made a recent foray into computer vision after being successful in natural language processing. The Vision Transformer (ViT) (Dosovitskiy et al.) \cite{dosovitskiy2021imageworth16x16words}, applies self-attention mechanism to patches of the image, allowing global context modeling with convolutions. Based on this, Query2Label \cite{Query2Label} introduces a transformer decoder that attends to feature map grids using label queries. This makes the model to simultaneously learn the label dependencies and make predictions in a more structured manner. Through employing cross-attention between label embeddings and visual features, Query2Label circularly learns label correlations and their spatial distributions. These results showcase the capability of transformer model and structured learning techniques to enhance multi-label classification, especially when the real-world constraints of sparse labels and unbalanced datasets are considered.
 
 % ======================== Theoretical Background ========================
 \section{Background}
-This section describes relevant background theory related to the project and methods from MLSPL and Query2Label. Beginning with the definition of multi-label learning, followed by deep neural network architectures used to solve multi-label slassification tasks, and, finally, loss functions as they can handle challenges of label imbalance tasks.
+This section provides essential theoretical background related to multi-label classification tasks, particularly focusing on concepts and methods relevant to Multi-Label Learning from Single Positive Labels (MLSPL) and Query2Label (Q2L).  Beginning with the definition of multi-label learning, followed by deep neural network architectures in multi-label classification. Finally, the contribution of various loss functions to the training of such neural networks is explored, outlining their roles in mitigating issues inherent in multi-label learning, such as label imbalance and incomplete annotation.
 
 \subsection{Multi-Label Learning}
 Contrary to binary or multi-class classification where each instance is associated with only one label, multi-label classification allows assigning multiple labels to a single input \cite{mlsp}. Given $K$ categories, an input image $x\in \mathcal{X}$ is associated with a binary vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
 
 \subsection{Convolutional Neural Networks (CNNs)}
-In the field of computer vision, Convolutional Neural Networks (CNNs) have been a dominant approach for image analysis tasks since their introduction \cite{lecun95}. CNNs are designed to recognize patterns in images by applying local filters through convolutional layers, preserving the two dimensional input of an image \cite{zhang2023dive}. CNNs consist of three main types of layers: convolutional layers, pooling layers, and a Fully Connected (FC) layer \cite{asawaCS231n}. Convolutional layers extract spatial features through learnable filters, pooling layers reduce dimensionality and summarise information, while the fully connected layer at the end interpret the features to perform the classification.
+In the field of computer vision, Convolutional Neural Networks (CNNs) have been a dominant approach for image analysis tasks since their introduction \cite{lecun95}. CNNs are designed to recognize patterns in images by applying local filters through convolutional layers, preserving the two dimensional input of an image \cite{zhang2023dive}. CNNs consist of three main types of layers: convolutional layers, pooling layers, and a Fully Connected (FC) layer \cite{asawaCS231n}. Convolutional layers extract spatial features through learnable filters, pooling layers reduce dimensionality and summarise information, while the fully connected layer at the end interpret the features to perform the classification. Thus, CNNs play a great role in encoding the visual content necessary for classification tasks in both fully and partially labeled multi-label settings, and functions as a backbone architecture in both MLSPL and Query2Label.
 
 \subsection{Transformer Architectures}
-Transformers, introduced by Vaswani et al. \cite{vaswani2023attentionneed}, are a type of neural network architecture initially developed to model long-range dependencies in sequence data. They achieve this using attention and self-attention mechanisms, which enables the model to have a long-term memory of inputs, and dynamically weigh the importance of each element in the input sequence. Originally, transformer-based models was mainly delevoped for natural language processing tasks, but the introduction of the Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, transformers have been widely used for computer vision tasks. 
+Transformers, introduced by Vaswani et al. \cite{vaswani2023attentionneed}, are a type of neural network architecture initially developed to model long-range dependencies in sequence data. They achieve this using attention and self-attention mechanisms, which enables the model to have a long-term memory of inputs, and dynamically weigh the importance of each element in the input sequence. Originally, transformer-based models was mainly delevoped for natural language processing tasks, but the introduction of the Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, transformers have been widely used for computer vision tasks. The following describes the mechanisms of the Transformer, which is a crucial component of the Query2Label solution.
+
 
 \paragraph{Architecture}
-The original transformer consists of an encoder-decoder structure. Both encoder and decoder are made of a stack of identical layers, where encoder layers contain a multi-head self-attention mechanism followed by a position-wise feed-forward network. In addition, decoder layers consists of an encoder-decoder attention layer. 
+The original transformer consists of an encoder-decoder structure. Both encoder and decoder are made of a stack of identical layers, where encoder layers contain a multi-head self-attention mechanism followed by a position-wise feed-forward network. In addition, decoder layers consists of an encoder-decoder attention layer, as illustrated in Figure~\ref{fig:encoder_decoder}. The transfomer decoder is of interest, as the authors of \cite{Query2Label} use them to extract features and automatically learn label embedding, as described in section \ref{sec:q2l_method}.
 
-The transfomer encoder is of interest, as the authors of \cite{Query2Label} use them to extract features and automatically learn label embedding, as described in section \ref{sec:q2l_method}.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{images/Transformer,_one_encoder-decoder_block.png}
+    \caption{Simple Encoder-Decoder. Figure from \cite{godoy_dl_visuals}.}
+    \label{fig:encoder_decoder}
+\end{figure}
 
 \paragraph{Attention}
 The core principle of the transformer architecture is the attention mechanism, which allows the model to attend to all posistions in an input sequence when processing each element. Thus alloowing the model to weigh the relevance of different posistions in a sequence. Given a query and a set of key-value pairs, the attention function computes a weighted sum of the values, where the weights are determined by similarities between the query and the keys.
@@ -151,6 +140,7 @@ The transformer model uses self-attention by relating every element in the input
 The transformer applies multiple attention functions in parallel, allowing the model to attend to information from different parts of the sequence. The embedding is split into multiple heads, perform attention for each, and then concatenate them back together, defined as:
 
 \begin{equation}
+    \label{eq:multihead}
     \text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, ..., \text{head}_h)W^O
 \end{equation}
     
@@ -165,8 +155,17 @@ The transformer applies multiple attention functions in parallel, allowing the m
 \paragraph{Cross-Attention}
 Contrary to self-attention, where queries, keys, and values are generated from the same input, cross-attention is a mechanisn where queries come from one source, and the keys and values come fron another. This mechanism allows the model to relate elements from one input to relevant parts of another input. The authours of Query2Label \cite{Query2Label} make use of this mechanism, where label embeddings (queries) attend to spatial image features (key-value pairs).
 
+
+
 \paragraph{Feed-Forward Networks and Positional Encoding}
-Each layer in the Transformer also includes a fully connected feed-forward network applied to each position. To compensate for the lack of order in the input sequence, sinusoidal positional encodings are added to the input embeddings. These encodings allow the model to distinguish the order of elements in the sequence using functions of varying frequencies.
+Each layer in the Transformer also includes a fully connected feed-forward network (FNN) applied to each position \cite{vaswani2023attentionneed}. To compensate for the lack of order in the input sequence, sinusoidal positional encodings are added to the input embeddings. These encodings allow the model to distinguish the order of elements in the sequence using functions of varying frequencies. The FNN is defined as:
+
+\begin{equation}
+    \label{eq:ffn}
+    \text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2\text{,}
+\end{equation}
+
+where $x$ is the input vector, $W_1$ and $b_1$ are the weight and bias of the first layer, $\max(0,\cdot)$ is the ReLU activation function, and $W_1$ and $b_1$ are the weight and bias of the second layer
 
 \paragraph{Vision Transformers (ViTs)}
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, is a model for image classification that leverages the transformer architecture: the self-attention mechanism of transformers that allows the model to selectively weigh the significance of each part of the input, and positional embeddings that represent the order of tokens in a sequence. In ViTs, images are represented as sequences, where the label function as a learnable token for classification. The input image is divided into a sequence of patches that are flattened and linearly embedded into a vector. The spatial information is preserved by adding positional encodings to the embeddings. The resulting sequence is fed into a transformer decoder identical to that introduced in \cite{vaswani2023attentionneed} to model global relations for classification.
@@ -188,7 +187,8 @@ The BCE loss for multi-label classification is given by:
 
 \noindent where $K$ is the number of categories, $y_i\in[0,1]$ is the binary label, and $p_i$ is the predicted probability.
 
-Due is its popularity in multi-class classification the BCE loss is used as a benchmark for model performance in \cite{mlsp}. However, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tend to focus on the majority class and perform poorly on the minority class. 
+Due to its popularity in multi-class classification the BCE loss is used as a benchmark for model performance in \cite{mlsp}. However, BCE loss can be sensitive to class imbalance, where some classes appear more often than others. In this case, the model tends to focus on the majority class and perform poorly on the minority class. Several solutions to this issue have been proposed, where the authors of Query2Label address this by incorporating asymmetric focal loss, described later in section~\ref{sec:afl}. 
+
 
 \paragraph{Loss Functions for the Partially Observed Labels Setting}
 BCE assumes that each training example indicates the presence or absence of each class, e.i. the example is fully observable. In real-world multi-label datasets, it is often infeasible to annotate all relevant labels for each image, resulting in only partially observed labels. In the case where labels are only partially observed, the assumption of full negative labeling in BCE can lead to false negatives during training, degrading model performance \cite{mlsp}. 
@@ -237,8 +237,8 @@ The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisf
 \noindent where both $\mathbf{F}_B$ and $\tilde{\mathbf{Y}}_B$ are updated simultaneously.
 
 \paragraph{Asymmetric focal Loss}
-\label{sec:asfl}
-A simplified version of asymmetric loss function is used by the authors of Q2L [2]. Asymmetric loss is a version of focal loss but with $\gamma$ taking on the value of 0 and 1 for positive and negative values respectively. This loss function effectively addresses the sample imbalance problem by making a distinction between negatives and positives, and focusing on the rarer positive labels while down-weighing the negative samples to prevent them taking over during training. For each training sample the loss is calculated using the following asymmetric focal loss function:
+\label{sec:afl}
+A simplified version of asymmetric loss function is used by the authors of \cite{Query2Label}. Asymmetric loss is a version of focal loss but with $\gamma$ taking on the value of 0 and 1 for positive and negative values respectively. This loss function effectively addresses the sample imbalance problem by making a distinction between negatives and positives, and focusing on the rarer positive labels while down-weighing the negative samples to prevent them taking over during training. For each training sample the loss is calculated using the following asymmetric focal loss function:
 
 \begin{equation}
     L = \frac{1}{K} \sum_{k=1}^{K}
@@ -248,27 +248,62 @@ A simplified version of asymmetric loss function is used by the authors of Q2L [
 \end{cases}
 \end{equation}
 
+Where $y_k$ is a binary indicator of whether sample $x$ contains label $k$. This loss is averaged over the entire data set to calculate the total loss. 
+
 % ======================== Methodology ========================
 
 \section{Method}
-% Focus Methodology on the rationale for choosing these methods, how the operationalized their training, and any adaptations made for reproduction.
-
-In real-world datasets, obtaining full label annotations is practiaclly impossible.
-This project focuses on finding solutions to the multi-label learning problems:
-\begin{itemize} 
-    \item  The challenge of multi-label learning in scenarios where only a single positive label per image is available durin training (MLSPL).
-    \item Label imbalance (Query2Label).
-    \item Feature localization (Query2Label).
-\end{itemize}
-
-\subsection{Overview of Approach}
-A brief description of what we did to solve the multi-label classification problem. 
-
+We chose MLSPL as the method for addressing sparse label annotation, and Query2Label as the method addressing feature localization. The multi-label classification dataset benchmark is the MS-COCO 2014. Results are reported in mean Average Precision (mAP). In the following section, the reason behind the chosen methods is outlined, and how each method aims to solve the multi-label learning challenges.
 
 
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 \label{sec:q2l_method}
-Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. It uses transformer decoders to extract features with multi-head attentions focusing on different parts of an object category and learn label embeddings from data automatically.
+Query2Label: A Simple Transformer Way to Multi-Label Classification (Query2Label) by Liu et al. \cite{Query2Label} is a two-stage framework for multi-label classification. 
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/q2l_framework.PNG}
+    \caption{Query2Label framework.}
+    \label{fig:q2l_framework}
+\end{figure}
+
+The label class is treated as a query in the Transformer decoder and the multi-head cross-attention module pools related features to classify them. The averaging of the different heads' attention maps for the label “person” can be seen in the picture below to the right. It would seem that using 3 heads is sufficient for the classification of this specific label as head-2 is not utilized. 
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/q2l_mha.PNG}
+    \caption{Visualization of multi-head attention maps for the target label \textit{person}.}
+    \label{fig:q2l_mha}
+\end{figure}
+
+The Qurey2Label model consists of two stages, described below: the first stage of Q2L can be any backbone feature extractor. The authors of Query2Label use 6 different backbone architectures: ResNet-101 with two resolutions: 448x448 and 576x576, TresNetL, TresNetL(22k), Swin-L(22k), and CvT-w24(22k). These are experimentally tested and evaluated to confirm which one is the optimal backbone. 
+
+The optimization is performed using the Adam optimizer, which utilizes an exponentially decaying average of past gradients to smooth out updates and the exponentially decaying average of squared gradients to adapt the learning rate for each parameter. 
+
+In the second stage, multiple Transformer decoder layers are implemented, using label embeddings as queries to check if each label exists. One Transformer encoder layer and two Transformer decoder layers handle feature updates. The transformer encoder layer enhances the global feature context, which makes for better feature representation. The label embedding is compared with features for at each spatial location in order to make attention-maps. Prediction of the existence of any label happens by performing multi-head cross-attention to pool features adaptively (by combining the spatial features based on attention maps) and then doing classification (prediction) based on the pooled features. A linear projection layer is present after the transformer decoder layers, which predicts the logits for each class. 
+
+In other words, given an input image $x\in \mathbb{R}^{H_0\times W_0\times 3}$ we extract the spatial features $\mathcal{F}_0\in \mathbb{R}^{H_0\times W_0\times d_0}$ where $H_0 \times W_0$ denotes the height and weight of the input image, $H \times W$ represents the height and weight of the feature map and $d_0$ represents the dimension of features. A linear projection layer projects the features from $d_0$ to $d$ to match the query dimension in the second stage to reshape the features into 
+The query updating then happens as the label embeddings is used as query: 
+$K$ is the number of categories. The queries are updated through a self-attention, a cross-attention and then a feed-forward network, where the following output of each update is given as:
+
+\begin{equation}
+    \begin{aligned}
+    \text{self-attn:} \quad & Q^{(1)}_i = \text{MultiHead}(\tilde{Q}_{i-1}, \tilde{Q}_{i-1}, \tilde{Q}_{i-1}) \\
+    \text{cross-attn:} \quad & Q^{(2)}_i = \text{MultiHead}(\tilde{Q}^{(1)}_i, \tilde{F}, F) \\
+    \text{FFN:} \quad & Q_i = \text{FFN}(Q^{(2)}_i)
+    \end{aligned}
+\end{equation}
+
+Where $\text{MultiHead(query, key, value)}$ is the same as Eq.~\ref{eq:multihead} and $\text{FFN}(x)$ is the same as Eq.~\ref{eq:ffn}. Tilde means the original vectors modified by factoring in position encodings.Additionally, class imbalance is mitigated by applying asymmetric focal loss (Section \ref{sec:afl}) as the chosen loss function for optimization.
+
+The transformer model solves a crucial challenge, which is the need to extract local discriminative features and do this adaptively for different labels. Unlike using the global average-pooled feature map from the final layer of a CNN directly for binary classification, the built in cross-attention module, also referred to as the encoder-decoder attention, retains rich information when extracting features. Similarities of a given query and extracted spatial features are represented in the mean of each head's cross-attention map as seen on Figure \ref{fig:q2l_attention}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.8\linewidth]{images/q2l_attention.PNG}
+    \caption{Visualization of cross-attention maps. Figure from \cite{Query2Label}. }
+    \label{fig:q2l_attention}
+\end{figure}
 
 \subsection{Multi-Label Learning from Single Positive Labels}
 MLSPL's solution to a sparsely annotated training dataset is twofold: first, they develop a training methodology using datasets where annotators have only provided a single confirmed positive label per image, with no confirmed negatives. Second, they extend existing multi-label loss functions to handle this challenging scenario and introduce novel variants to constrain the expected number of positive labels.
@@ -394,6 +429,7 @@ Our experimental results confirmed that both methods performed as expected: Quer
 On the other hand, the implementation of MLSPL ran without resource constraints. Our implementation demonstrated results that slightly outperformed the reported results. This indicates that the ROLE loss is a robust choice that can be implemented with various configurations. 
 
 Multi-label classification continues to mature as novel training methods and frameworks are discovered and refined.  Innovation in the field multi-label classification shows potential as many recent novelties are introduced and unexplored variants of the classification problems are investigated. 
+
 
 
 \bibliographystyle{IEEEtran}
