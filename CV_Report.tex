@@ -28,22 +28,7 @@
 \Large Multi-label Image Classification}
 \author{Group 25 \\ \vspace{.2em} Riajul Islam, Andreas Calonius Kreth, Christine Midtgaard}
 
-
-
 \maketitle
-
-% Todo:
-% [] Describe the multi-label classification problem and its challenges.
-
-% [] Explain each method's theoretical background and mechanisms.
-
-% [] Compare their approaches to the problem.
-
-% [] Reproduce their models, train and evaluate them.
-
-% [] Compare your results with those reported in the papers.
-
-% [] Evaluate the feasibility and performance of each method.
 
 \begin{abstract}
 Multi-label image classification presents significant challenges due to sparse labeling, label imbalance, and the complexity inherent in real-world image datasets. This paper explores two state-of-the-art methodologies addressing these issues: Query2Label (Q2L), which utilizes transformer architectures and asymmetric focal loss to effectively manage label imbalance and localize discriminative features, and Multi-label Learning from Single Positive Labels (MLSPL), which adapts loss functions and employs novel regularization techniques for scenarios with extremely limited supervision. Both models are evaluated on the MS-COCO 2014 dataset and results are reported in mean average precision (mAP). Results indicate that Q2L achieves state of the art performance with its two-stage architecture and MLSPL proves robust in a weakly supervised setting, effectively tackling the challenge of sparse annotations. Results from our experiments show that the methods investigated in this project obtain the expected results on the COCO dataset. However, training with ViT architecture backbones on Query2Label has shown to be infeasible due to limited memory in our experimental environment, and thus require a setup with increased computational power. Further improvements in multi-label classification models seem likely due to the potential in these architectures and training strategies.
@@ -67,7 +52,7 @@ In computer vision problems in general, Transformers have recently shown a huge 
 
 Multi-Label Learning from Single Positive Labels (MLSPL) provides a framework to tackle the intrinsic nature of the world being multi-label: scenes typically contain several objects. The challenge of assigning labels when information during training is sparse is explored through this model, which incorporates a novel single positive multi-label loss function that jointly trains the image classifier and estimates missing labels during training. This method is interesting as an efficient method of training multi-label classifiers on images with only a single positive label with minimal supervision could reduce costs of annotating datasets unnecessarily and excessive training. A trade-off in reducing resource costs is worthwhile if the drop in performance is tolerable compared to fully annotated datasets. 
 
-We evaluate the proposed models' performance on the MS-COCO 2014 dataset and discuss mAP performance and the capacity for solving the challenges associated with multi-label image classification.
+We evaluate the proposed models' performance on the MS-COCO 2014 dataset and discuss mean Average Precision (mAP) performance and the capacity for solving the challenges associated with multi-label image classification.
 
 \section{Related Work}
 Multi-label learning has become increasingly sought after in the computer vision research community. There have been several work proposed to enhance the model performance in under label sparsity, class imbalance, and noisy annotations. This section considers related work on loss functions, positive-unlabeled learning, partially observed labels, and attention-based architectures.
@@ -81,27 +66,19 @@ Another challenge of multi-label classification is how to select which areas of 
 
 
 \paragraph{PU learning} 
-% Learning from positive and unlabeled data: a survey by Bekker and Davis \cite{Bekker_2020}.
-
 The concept of learning from partially labeled samples, in which only positive labels are observed while the others are unknown, is from PU learning. A complete collection of PU learning methods and the corresponding discussions can be found in the survey of Bekker and Davis \cite{Bekker_2020}, and the early investigation in text classification is reported in \cite{Li_2003}. The proposed approaches operate under the assumption that the missing labels may not be negative, a particularly relevant assumption to multi-label image problems. Transplanting such ideas to the case of vision tasks, theoretical works and practical models have been proposed that can learn from noisy weak-supervision datasets, as in the the MLSPL framework \cite{mlsp}.
 
-% Learning to Classify Texts Using Positive and Unlabeled Data by Li and Liu \cite{Li_2003}.
 
 \paragraph{Partially Observed Labels}
-% % Learning a Deep ConvNet for Multi-label Classification with Partial Labels https://arxiv.org/pdf/1902.09720
 In practice, the great Majority of large Datasets are only partially annotated, as full Annotations are often too costly to obtain. Multiple approaches have been proposed to tackle learning from partially observed labels. Heuristic-based approaches \cite{mlsp} minimize annotation effort but add noise and uncertainty. More principled methods, such as ROLE, attempt to predict missing labels in a structured manner. Durand et al. \cite{durand2019learningdeepconvnetmultilabel} also consider partial labels within the context of deep networks and investigate how the right choice of loss function and architecture can alleviate the problem of false negatives.
 
-% \paragraph{Heuristics}
-% Heuristics can be used to reduce the required
-% annotation effort [34, 18], but this runs the risk of increasing
-% error in the labels \cite{mlsp}.
 
 \paragraph{Attention and Transformer Architectures}
-Transformer-based models have also made a recent foray into computer vision after being successful in natural language processing. The Vision Transformer (ViT) (Dosovitskiy et al.) \cite{dosovitskiy2021imageworth16x16words}, applies self-attention mechanism to patches of the image, allowing global context modeling with convolutions. Based on this, Query2Label \cite{Query2Label} introduces a transformer decoder that attends to feature map grids using label queries. This makes the model to simultaneously learn the label dependencies and make predictions in a more structured manner. Through employing cross-attention between label embeddings and visual features, Query2Label circularly learns label correlations and their spatial distributions. These results showcase the capability of transformer model and structured learning techniques to enhance multi-label classification, especially when the real-world constraints of sparse labels and unbalanced datasets are considered.
+Transformer-based models have also made a recent foray into computer vision after being successful in natural language processing. The Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, applies self-attention mechanism to patches of the image, allowing global context modeling with convolutions. Based on this, Q2L \cite{Query2Label} introduces a transformer decoder that attends to feature map grids using label queries. This makes the model to simultaneously learn the label dependencies and make predictions in a more structured manner. Through employing cross-attention between label embeddings and visual features, Query2Label circularly learns label correlations and their spatial distributions. These results showcase the capability of transformer model and structured learning techniques to enhance multi-label classification, especially when the real-world constraints of sparse labels and unbalanced datasets are considered.
 
 % ======================== Theoretical Background ========================
 \section{Background}
-This section provides essential theoretical background related to multi-label classification tasks, particularly focusing on concepts and methods relevant to Multi-Label Learning from Single Positive Labels (MLSPL) and Query2Label (Q2L).  Beginning with the definition of multi-label learning, followed by deep neural network architectures in multi-label classification. Finally, the contribution of various loss functions to the training of such neural networks is explored, outlining their roles in mitigating issues inherent in multi-label learning, such as label imbalance and incomplete annotation.
+This section provides essential theoretical background related to multi-label classification tasks, particularly focusing on concepts and methods relevant to MLSPL and Q2L.  Beginning with the definition of multi-label learning, followed by deep neural network architectures in multi-label classification. Finally, the contribution of various loss functions to the training of such neural networks is explored, outlining their roles in mitigating issues inherent in multi-label learning, such as label imbalance and incomplete annotation.
 
 \subsection{Multi-Label Learning}
 Contrary to binary or multi-class classification where each instance is associated with only one label, multi-label classification allows assigning multiple labels to a single input \cite{mlsp}. Given $K$ categories, an input image $x\in \mathcal{X}$ is associated with a binary vector of labels $y=[y_1,...,y_K]$ from the label space $\mathcal{Y}=\{0,1\}^K$, where $y_k=1$ represents that $k$ is present in $x$ and $y_k=0$ otherwise. The goal is to create a model that outputs the probability of the presence of a category $p=[p_1,...,p_K]$ \cite{mlsp,Query2Label}.
@@ -199,27 +176,27 @@ To address this issue, several loss functions have been proposed to handle parti
 Assuming that unobserved labels are negative leads to the BCE loss for the positive only case:
 
 \begin{equation}
-    \mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n) = - \sum_{i=1}^{L}\mathds{1}_{[z_{ni}=1]}\log(f_{ni})
+    \mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n) = - \sum_{i=1}^{K}\mathds{1}_{[z_{ni}=1]}\log(f_{ni})
 \end{equation}
 
-However, this predicts all labels as positive. The solution to this is the introduction of a regularization term that contains a domain knowledge. They define a scalar $k$, which is the expected number of positives per image, and an estimated average number of predicted positves $\hat{k}(\mathbf{F}_B)$ from batch predictions, where $\mathbf{F}_B = [f_{ni}]_{n\in B,i\in\{1,...,L\}}$ is defined to be the predictions $f_{ni}\in[0,1]$ for every image in a batch $B\subset \{1,...,N\}$. A regularization term at batch level is introduced to penalize deviations from $k$:
+\noindent where $\mathbf{f}_n\in[0,1]^K$ denotes the predicted probabilities for sample $n$, $f_{ni}$ is the probability for class $i$, $\mathbf{z}_n\in\{0,1\}^K$  is the observed label vector, and $\mathds{1}_{[z_{ni}=1]}$ is an indicator function selecting the observed class. However, this predicts all labels as positive. The solution to this is the introduction of a regularization term that contains a domain knowledge. They define a scalar $\kappa$, which is the expected number of positives per image, and an estimated average number of predicted positves $\hat{\kappa}(\mathbf{F}_B)$ from batch predictions, where $\mathbf{F}_B = [f_{ni}]_{n\in B,i\in\{1,...,L\}}$ is defined to be the predictions $f_{ni}\in[0,1]$ for every image in a batch $B\subset \{1,...,N\}$. A regularization term at batch level is introduced to penalize deviations from $\kappa$:
 
 \begin{equation}
-    R_k(\mathbf{F}_B) = \left(\frac{\hat{k}(\mathbf{F}_B)-k}{L}\right)^2
+    R_\kappa(\mathbf{F}_B) = \left(\frac{\hat{\kappa}(\mathbf{F}_B)-\kappa}{K}\right)^2
 \end{equation}
 
 \noindent The overall loss is:
 
 \begin{equation}
     \label{eq:epr}
-    \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n)+\lambda R_k(\mathbf{F}_B)\text{,}
+    \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n)+\lambda R_\kappa(\mathbf{F}_B)\text{,}
 \end{equation}
 
-where $\lambda$ is a hyperparameter.
+\noindent where $\lambda$ is a hyperparameter.
 
 
 \paragraph{Regularized Online Label Estimation (ROLE)}
-The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisfactory results, and thus propose a combination of $\mathcal{L}_{EPR}$ and a label estimator module that maintains online estimates of the missing labels during training, called Regularized Online Label Estimation (ROLE). This method jointly trains the image classifier and a label estimator subject to constraints imposed by $\mathcal{L}_{EPR}$. This maintains soft estimates of the full label vector during training, resulting in ROLE assuming unobserved labels to have a probability between 1 and 0. For a batch $B$, let $\mathbf{\tilde{Y}}\in[0,1]^{N\times L}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times L}$ represent the matrix of classifier predictions. The goal is to jointly train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$. An intermediate loss is defined as:
+The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisfactory results, and thus propose a combination of $\mathcal{L}_{EPR}$ and a label estimator module that maintains online estimates of the missing labels during training, called Regularized Online Label Estimation (ROLE). This method jointly trains the image classifier and a label estimator subject to constraints imposed by $\mathcal{L}_{EPR}$. This maintains soft estimates of the full label vector during training, resulting in ROLE assuming unobserved labels to have a probability between 1 and 0. For a batch $B$, let $\mathbf{\tilde{Y}}\in[0,1]^{N\times K}$ represent the estimated labels, and $\mathbf{F}\in[0,1]^{N\times K}$ represent the matrix of classifier predictions. The goal is to jointly train the label estimator $g(\cdot;\phi)$ and the image classifier $f(\cdot;\theta)$. An intermediate loss is defined as:
 
 \begin{equation}
     \label{eq:intermediate}
@@ -229,7 +206,7 @@ The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisf
     \end{aligned}
 \end{equation}
 
-\noindent where $\text{sg}$ is a stop-gradient. This loss is used to update $\theta$ while keeping $\phi$ fixed. By switching the arguments in Eq.~\ref{eq:intermediate}, $\phi$ is updated while keeping $\theta$ fixed. This leads to the final ROLE loss, given by:
+\noindent where $\tilde{\mathbf{Y}}_B\in [0,1]^{N\times K}$ is the matrix of estimated label vectors, $\tilde{\mathbf{y}}_n$ is the estimate for image $n$, and $\text{sg}$ is a stop-gradient. This loss is used to update $\theta$ while keeping $\phi$ fixed. By switching the arguments in Eq.~\ref{eq:intermediate}, $\phi$ is updated while keeping $\theta$ fixed. This leads to the final ROLE loss, given by:
 
 \begin{equation}
     \label{eq:role}
@@ -243,14 +220,14 @@ The authors of \cite{mlsp} report that $\mathcal{L}_{EPR}$ does not yield satisf
 A simplified version of asymmetric loss function is used by the authors of \cite{Query2Label}. Asymmetric loss is a version of focal loss but with $\gamma$ taking on the value of 0 and 1 for positive and negative values respectively. This loss function effectively addresses the sample imbalance problem by making a distinction between negatives and positives, and focusing on the rarer positive labels while down-weighing the negative samples to prevent them taking over during training. For each training sample the loss is calculated using the following asymmetric focal loss function:
 
 \begin{equation}
-    L = \frac{1}{K} \sum_{k=1}^{K}
+    \mathcal{L} = \frac{1}{K} \sum_{k=1}^{K}
 \begin{cases}
 (1 - p_k)^{\gamma^+} \log(p_k), & \text{if } y_k = 1 \\
 (p_k)^{\gamma^-} \log(1 - p_k), & \text{if } y_k = 0
 \end{cases}
 \end{equation}
 
-Where $y_k$ is a binary indicator of whether sample $x$ contains label $k$. This loss is averaged over the entire data set to calculate the total loss. 
+\noindent where $y_k$ is a binary indicator of whether sample $x$ contains label $k$. This loss is averaged over the entire data set to calculate the total loss. 
 
 % ======================== Methodology ========================
 
