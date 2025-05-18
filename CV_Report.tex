@@ -19,8 +19,18 @@
 \usepackage{hyperref}
 \usepackage{dsfont}
 
+\makeatletter
+\renewcommand{\paragraph}[1]{%
+  \vspace{1.5ex}\textbf{#1}\quad
+}
+\makeatother
 
-
+\makeatletter
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname\quad}
+\makeatother
 
 
 \begin{document}
