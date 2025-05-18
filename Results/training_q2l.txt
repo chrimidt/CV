@@ -14,6 +14,17 @@ main_mlc.py \
 --enc_layers 1 --dec_layers 2 --nheads 4 \
 --early-stop --amp 
 
-python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone resnet101 --dataname coco14 --batch-size 8 --print-freq 100 --output "output/coco14" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 448 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 2048 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4
+This works (ResNet-101):
+python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone resnet101 --dataname coco14 --batch-size 16 --print-freq 100 --output "output/coco14" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 448 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 2048 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4
 
-python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone CvT_w24 --dataname coco14 --batch-size 2 --print-freq 100 --output "output/coco14_cvt" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 384 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 2048 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4
+This works (TresNetL):
+python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone tresnetl --dataname coco14 --batch-size 16 --print-freq 100 --output "output/coco14_cvt" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 448 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 2432 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4
+
+This works (TresNetL22):
+python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone tresnetl_v2 --dataname coco14 --batch-size 16 --print-freq 100 --output "output/coco14_cvt" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 448 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 2048 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4
+
+This does not work (SwinL):
+python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone swin_L_384_22k --dataname coco14 --batch-size 1 --print-freq 100 --output "output/coco14_cvt" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 384 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 1536 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4
+
+This does not work (CvT_w24):
+python -m torch.distributed.launch --nproc_per_node=2 main_mlc.py --dataset_dir "data/coco" --backbone Cvt_w24 --dataname coco14 --batch-size 2 --print-freq 100 --output "output/coco14" --world-size 1 --rank 0 --dist-url tcp://127.0.0.1:3717 --gamma_pos 0 --gamma_neg 2 --dtgfl --epochs 80 --lr 1e-4 --optim AdamW --pretrained --num_class 80 --img_size 448 --weight-decay 1e-2 --cutout --n_holes 1 --cut_fact 0.5 --hidden_dim 2048 --dim_feedforward 8192 --enc_layers 1 --dec_layers 2 --nheads 4 --early-stop --amp -j 4

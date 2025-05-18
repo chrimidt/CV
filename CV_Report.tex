@@ -59,8 +59,8 @@ classification, deep learning for MLC, MS-COCO 2014.
 
 \section{Introduction}
 
-Multi-label classification is a supervised classification task in which each instance can be attached with one or more labels. This difference with respect to single-label or multi-class classification, in which each input is assigned a single class, is what fundamentally changes the nature of the problem. In computer vision, images usually have more than one objects or concepts, so multi-label classification is more appropriate for practical applications such as image tagging, autonomous driving and medical diagnosis [reference here].
-However, multi-label classification is not without its hurdles. Firstly, label correlation can lead to performance issues, as labels are not independent — e.g., beach and ocean tend to co-occur. Second, the imbalance among classes is very common in the real-world datasets, i.e. some categories may occur frequently, while some others may rarely appear, resulting in the model biased toward most categories and ignoring the minority ones. Third, sparse labeling or partial supervision is commonly encountered [reference here]. Full annotation of every image with all the present labels is costly and not always feasible which eventually leads to training data where only a part of the labels are assigned to each image.
+Multi-label classification is a supervised classification task in which each instance can be attached with one or more labels. This difference with respect to single-label or multi-class classification, in which each input is assigned a single class, is what fundamentally changes the nature of the problem. In computer vision, images usually have more than one objects or concepts, so multi-label classification is more appropriate for practical applications such as image tagging, autonomous driving \cite{WU2024105189}, and medical diagnosis \cite{ge2018chestxraysclassificationmultilabel}.
+However, multi-label classification is not without its hurdles. Firstly, label correlation can lead to performance issues, as labels are not independent — e.g., beach and ocean tend to co-occur. Second, the imbalance among classes is very common in the real-world datasets, i.e. some categories may occur frequently, while some others may rarely appear, resulting in the model biased toward most categories and ignoring the minority ones. Third, sparse labeling or partial supervision is commonly encountered \cite{mlsp}. Full annotation of every image with all the present labels is costly and not always feasible which eventually leads to training data where only a part of the labels are assigned to each image.
 In this work, we study solutions to two fundamental challenges of multi-label learning: (i) learning from sparsely annotated data, namely training from a single positive label per image, and (ii) coping with label imbalance while maintaining the capability of feature localization. 
 
 In computer vision problems in general, Transformers have recently shown a huge potential due to retaining rich spatial information when extracting features in contrast to CNNs discarding information in the convolutional feature map. Therefore, we have chosen to analyse a vision Transformer-based model, which achieves state-of-the-art performance. Query2Label (Q2L) utilizes a two-stage system in which firstly the features are extracted using a backbone network, and in the second stage Transformer encoder-decoder layers are leveraged to pool features using label embeddings as queries. The model learns the label embeddings end-to-end to enhance potential and decrease risk of learning spurious correlations. The state-of-the-art performance together with a novel architecture made this model a likely candidate to investigate. 
@@ -74,8 +74,7 @@ Multi-label learning has become increasingly sought after in the computer vision
 
 
 \paragraph{Loss Functions}
-The loss function is a necessary ingredient of any deep learning model to direct how parmeter should be optimized. Binary Cross-Entropy (BCE) is commonly used for multi-label classification as it is designed to deal with multiple binary targets per sample \cite{mlsp,durand2019learningdeepconvnetmultilabel}. However, BCE treat any unobserved label as the negative, and therefore such approach may not always work as expected in the case where supervision is scarce. Various alternative loss functions have been proposed to deal with class imbalance, such as Focal Loss which falls back on easy negatives and Asymmetric Loss which treats negative as seriously as positive.
-To address the issue of label sparsity, Cole et al. introduced the Regularized Online Label Estimation (ROLE) loss \cite{mlsp}. ROLE co-trains a classifier together with a label estimator to obtain soft labels for unseen categories. By using estimated label vectors and encouraging consistency with known positives and desired label counts, ROLE enables the model to recover the true labels that are not directly annotated during training.
+The loss function is a necessary ingredient of any deep learning model to direct how parmeter should be optimized. Binary Cross-Entropy (BCE) is commonly used for multi-label classification as it is designed to deal with multiple binary targets per sample \cite{mlsp,durand2019learningdeepconvnetmultilabel}. However, BCE treat any unobserved label as the negative, and therefore such approach may not always work as expected in the case where supervision is scarce. Various alternative loss functions have been proposed to deal with class imbalance, such as Focal Loss  which falls back on easy negatives and Asymmetric Loss which treats negative as seriously as positive.
 
 \paragraph{Locating areas of interest}
 Another challenge of multi-label classification is how to select which areas of an input image are interesting and only selecting said areas. Early methods would find proposed regions of interest and then treat them as a single-label classification problem \cite{HCP}. Often the discovered bounding boxes would be coarse or be contaminated with background information. Later works would correlate regions of interest with semantic labels by using a spatial transformer layer followed by a Long Short-Term Memory subsystem for predictions \cite{ltsm}.
@@ -111,6 +110,7 @@ Contrary to binary or multi-class classification where each instance is associat
 In the field of computer vision, Convolutional Neural Networks (CNNs) have been a dominant approach for image analysis tasks since their introduction \cite{lecun95}. CNNs are designed to recognize patterns in images by applying local filters through convolutional layers, preserving the two dimensional input of an image \cite{zhang2023dive}. CNNs consist of three main types of layers: convolutional layers, pooling layers, and a Fully Connected (FC) layer \cite{asawaCS231n}. Convolutional layers extract spatial features through learnable filters, pooling layers reduce dimensionality and summarise information, while the fully connected layer at the end interpret the features to perform the classification. Thus, CNNs play a great role in encoding the visual content necessary for classification tasks in both fully and partially labeled multi-label settings, and functions as a backbone architecture in both MLSPL and Query2Label.
 
 \subsection{Transformer Architectures}
+\label{sec:transformers}
 Transformers, introduced by Vaswani et al. \cite{vaswani2023attentionneed}, are a type of neural network architecture initially developed to model long-range dependencies in sequence data. They achieve this using attention and self-attention mechanisms, which enables the model to have a long-term memory of inputs, and dynamically weigh the importance of each element in the input sequence. Originally, transformer-based models was mainly delevoped for natural language processing tasks, but the introduction of the Vision Transformer (ViT) by Dosovitskiy et al. \cite{dosovitskiy2021imageworth16x16words}, transformers have been widely used for computer vision tasks. The following describes the mechanisms of the Transformer, which is a crucial component of the Query2Label solution.
 
 
@@ -260,7 +260,7 @@ We chose to investigate the method proposed in MLSPL as the method for addressin
 
 \subsection{Query2Label: A Simple Transformer Way to Multi-Label Classification}
 \label{sec:q2l_method}
-We selected Query2Label (Q2L) due to its novel use of transformer architectures to address the challenge of localizing discriminative features in multi-label classification, and its reported state-of-the-art results on the COCO dataset.
+We selected Query2Label \cite{Query2Label} due to both its novel use of transformer architectures in addressing the challenge of localizing discriminative features in multi-label classification, and its reported state-of-the-art results on the COCO dataset. In contrast to CNN-based methods, Query2Label models spatial regions of interest through a query-based attention mechanism. This allows the model to effectively extract features, even when multiple objects of varying sizes exists in a single image \cite{Query2Label}.
 
 \begin{figure}[t]
     \centering
@@ -269,22 +269,16 @@ We selected Query2Label (Q2L) due to its novel use of transformer architectures 
     \label{fig:q2l_framework}
 \end{figure}
 
-The label class is treated as a query in the Transformer decoder and the multi-head cross-attention module pools related features to classify them. The averaging of the different heads' attention maps for the label “person” can be seen in the picture below to the right. It would seem that using 3 heads is sufficient for the classification of this specific label as head-2 is not utilized. 
+% The label class is treated as a query in the Transformer decoder and the multi-head cross-attention module pools related features to classify them. The averaging of the different heads' attention maps for the label “person” can be seen in the picture below to the right. It would seem that using 3 heads is sufficient for the classification of this specific label as head-2 is not utilized. 
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=.8\linewidth]{images/q2l_mha.PNG}
-    \caption{Visualization of multi-head attention maps for the target label \textit{person}.}
-    \label{fig:q2l_mha}
-\end{figure}
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=.8\linewidth]{images/q2l_mha.PNG}
+%     \caption{Visualization of multi-head attention maps for the target label \textit{person}.}
+%     \label{fig:q2l_mha}
+% \end{figure}
 
-The Qurey2Label model consists of two stages, described below: the first stage of Q2L can be any backbone feature extractor. The authors of Query2Label use 6 different backbone architectures: ResNet-101 with two resolutions: 448x448 and 576x576, TresNetL, TresNetL(22k), Swin-L(22k), and CvT-w24(22k). These are experimentally tested and evaluated to confirm which one is the optimal backbone. 
-
-The optimization is performed using the Adam optimizer, which utilizes an exponentially decaying average of past gradients to smooth out updates and the exponentially decaying average of squared gradients to adapt the learning rate for each parameter. 
-
-In the second stage, multiple Transformer decoder layers are implemented, using label embeddings as queries to check if each label exists. One Transformer encoder layer and two Transformer decoder layers handle feature updates. The transformer encoder layer enhances the global feature context, which makes for better feature representation. The label embedding is compared with features for at each spatial location in order to make attention-maps. Prediction of the existence of any label happens by performing multi-head cross-attention to pool features adaptively (by combining the spatial features based on attention maps) and then doing classification (prediction) based on the pooled features. A linear projection layer is present after the transformer decoder layers, which predicts the logits for each class. 
-
-In other words, given an input image $x\in \mathbb{R}^{H_0\times W_0\times 3}$ we extract the spatial features $\mathcal{F}_0\in \mathbb{R}^{H_0\times W_0\times d_0}$ where $H_0 \times W_0$ denotes the height and weight of the input image, $H \times W$ represents the height and weight of the feature map and $d_0$ represents the dimension of features. A linear projection layer projects the features from $d_0$ to $d$ to match the query dimension in the second stage to reshape the features into 
+The Query2Label framework consists of two stages. In the first stage, a bockbone network extracts spatial features from an input image. The backbone network can be any architecture, and the authors of Query2Label report the performance of various backbone architectures combined with the Q2L method. In the second stage, multiple Transformer decoder layers are implemented (see Section~\ref{sec:transformers}), using label embeddings as queries to check if each label exists. One Transformer encoder layer and two Transformer decoder layers handle feature updates. The transformer encoder layer enhances the global feature context, which makes for better feature representation. The label embedding is compared with features for at each spatial location in order to make attention-maps. Prediction of the existence of any label happens by performing multi-head cross-attention to pool features adaptively (by combining the spatial features based on attention maps) and then doing classification (prediction) based on the pooled features. A linear projection layer is present after the transformer decoder layers, which predicts the logits for each class. In other words, given an input image $x\in \mathbb{R}^{H_0\times W_0\times 3}$ we extract the spatial features $\mathcal{F}_0\in \mathbb{R}^{H_0\times W_0\times d_0}$ where $H_0 \times W_0$ denotes the height and weight of the input image, $H \times W$ represents the height and weight of the feature map and $d_0$ represents the dimension of features. A linear projection layer projects the features from $d_0$ to $d$ to match the query dimension in the second stage to reshape the features into 
 The query updating then happens as the label embeddings is used as query: 
 $K$ is the number of categories. The queries are updated through a self-attention, a cross-attention and then a feed-forward network, where the following output of each update is given as:
 
@@ -296,9 +290,9 @@ $K$ is the number of categories. The queries are updated through a self-attentio
     \end{aligned}
 \end{equation}
 
-Where $\text{MultiHead(query, key, value)}$ is the same as Eq.~\ref{eq:multihead} and $\text{FFN}(x)$ is the same as Eq.~\ref{eq:ffn}. Tilde means the original vectors modified by factoring in position encodings.Additionally, class imbalance is mitigated by applying asymmetric focal loss (Section \ref{sec:afl}) as the chosen loss function for optimization.
+Where $\text{MultiHead(query, key, value)}$ is the same as Eq.~\ref{eq:multihead} and $\text{FFN}(x)$ is the same as Eq.~\ref{eq:ffn}. Tilde means the original vectors modified by factoring in position encodings. Additionally, class imbalance is mitigated by applying asymmetric focal loss (Section \ref{sec:afl}) as the chosen loss function for optimization.
 
-The transformer model solves a crucial challenge, which is the need to extract local discriminative features and do this adaptively for different labels. Unlike using the global average-pooled feature map from the final layer of a CNN directly for binary classification, the built in cross-attention module, also referred to as the encoder-decoder attention, retains rich information when extracting features. Similarities of a given query and extracted spatial features are represented in the mean of each head's cross-attention map as seen on Figure \ref{fig:q2l_attention}.
+The transformer model solves a crucial challenge, which is the need to extract local discriminative features and do this adaptively for different labels. Unlike using the global average-pooled feature map from the final layer of a CNN directly for binary classification, the built in cross-attention module retains rich information when extracting features. Similarities of a given query and extracted spatial features are represented in the mean of each head's cross-attention map as seen on Figure \ref{fig:q2l_attention}.
 
 \begin{figure}[t]
     \centering
@@ -307,8 +301,10 @@ The transformer model solves a crucial challenge, which is the need to extract l
     \label{fig:q2l_attention}
 \end{figure}
 
+As mentioned earlier, the backbone network can be arbitrary. In this project, we replicate the experiments on the following: ResNet-101 with two resolutions ($448\times 448$ and $576\times 576$), TresNetL, TresNetL(22k), Swin-L(22k), and CvT-w24(22k). The results from our experiments can be seen in Table~\ref{tab:q2l_map_comparison}.
+
 \subsection{Multi-Label Learning from Single Positive Labels}
-We chose to investigate the method proposed my MLSPL as the solution to the challenge of sparse annotation, a common problem in multi-label classification tasks \cite{mlsp}. The MLSPL framework is designed to learn from the case of minimal supervision: only one positive label per image. This approach reports results of up to $88.2\%$ on the VOC12 [reference] dataset, and $69.0$ on the COCO dataset (See Table~\ref{tab:MLSPL_map_comparison}), and thus demonstrates potential to reduce annotation cost significantly.
+We chose to investigate the method proposed my MLSPL as the solution to the challenge of sparse annotation, a common problem in multi-label classification tasks \cite{mlsp}. The MLSPL framework is designed to learn from the case of minimal supervision: only one positive label per image. This approach reports results of up to $88.2\%$ on the VOC12 dataset, and $69.0$ on the COCO dataset, and thus demonstrates potential to reduce annotation cost significantly.
 
 The authors' solution to this problem lies in the design of the loss function, which combines two key techniques: Expected Positive Regularization (EPR) and Regularized Online Label Estimation (ROLE).
 
@@ -323,13 +319,15 @@ Expected Positive Regularization (EPR) (Eq.~\ref{eq:epr}) introduces a soft cons
 
 The effectiveness of ROLE in recovering unobserved labels is illustrated in Figure~\ref{fig:mlsp_fig2}. 
 
+In replicating the findings from MLSPL, we chose to focus on the performance of $\mathcal{L}_{ROLE}$ on the COCO dataset trained on the linear classifier with fixed features, and the fine-tuned network. In both cases, the backbone is an ImageNet pretrained ResNet-50. Results from our experiments can be seen in Table~\ref{tab:MLSPL_map_comparison}.
+
 % ======================== Experimental Setup  ========================
 
 \section{Experiments}
 All experiments were conducted on a cluster with access to two NVIDIA GeForce RTX 3060 GPU (12 GB VRAM). The cluster was equipped with Ubuntu 22.04.5 LTS.
 
 \subsection{Dataset}
-The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images.
+The MS-COCO 2014 \cite{coco14} dataset is used as a benchmark for evaluation both Query2Label and MLSPL. MS-COCO (Microsoft Common Objects in Context) is a large-scale dataset commonly used for object detection, segmentation, and multi-label image classification. COCO consists of 82,081 training images and 80 classes, and a validation set of 40,137 images. Examples from the COCO dataset can be seen in Figure~\ref{fig:coco-examples}.
 
 \begin{figure}[t]
     \centering
@@ -350,10 +348,29 @@ Additionally, we encountered a missing dependency for RandAugment, which was not
 While the original work includes experiments on five datasets, our reproduction is limited to the MS-COCO 2014 dataset. The model was evaluated on the MS-COCO 2014 dataset. All images were resized to match the input resolution required by each respective backbone. Label annotations for each image were preserved in their multi-label format.
 
 \paragraph{Training}
-Attempts to train Query2Label with the CvT-w24 backbone failed due to memory limitations of the available 12GB GPUs. However, due to time constraints, we did not replicate the original training procedure using our own setup, and only tested if training was possible with the limited memory availability, and instead, we relied on the publicly released pretrained models provided by the authors. The Query2Label framework was evaluated using four backbone configurations: ResNet-101 at resolutions of $448\times448$ and $576\times576$, as well as Swin-L(22k) and CvT-w24(22k) at $384\times384$, both pretrained on the ImageNet-22k \cite{imagenet} dataset. These models were originally trained on the MS-COCO 2014 training set and evaluated in our experiments on the MS-COCO 2014 validation set. We used a batch size of 16 and made no further modifications or fine-tuning.
+Attempts to train Query2Label with the CvT-w24 backbone failed due to memory limitations of the available 12GB GPUs. However, due to time constraints, we did not replicate the original training procedure using our own setup, and only tested if training was possible with the limited memory availability, and instead, we relied on the publicly released pretrained models provided by the authors. The Query2Label framework was evaluated using four backbone configurations: ResNet-101 at resolutions of $448\times448$ and $576\times576$, as well as Swin-L(22k) and CvT-w24(22k) at $384\times384$, both pretrained on the ImageNet-22k \cite{imagenet} dataset. These models were originally trained on the MS-COCO 2014 training set and evaluated in our experiments on the MS-COCO 2014 validation set. We used a batch size of 16 and made no further modifications or fine-tuning. The training was performed using the Adam optimizer. 
+
 
 We tested training the Query2Label model from scratch using the ResNet-101 backbone. Distributed training was enabled to leverage both GPUs. Training was conducted with a batch size of 8, chosen to fit within the memory constraints of the GPUs. The model was optimized using AdamW with a learning rate of $10^{-4}$, weight decay of $10^{-2}$, and trained for 80 epochs with early stopping enabled. Data augmentation included random cutout with one hole and a cut factor of 0.5. Four data loading workers were used per process. No modifications were made to the original model architecture or loss design.
 
+\begin{table*}[t]
+    \small
+    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
+    \label{tab:q2l_map_comparison}
+    \centering
+    \begin{tabular}{l l l c c}
+    \toprule
+    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
+    \midrule
+    Q2L-R101     & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
+    Q2L-R101     & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
+    Q2L-TresL    & TResNetL       & $448\times448$ & 87.3 & 87.3 \\
+    Q2L-Tres     & TResNetL(22k)  & $448\times448$ & 89.2 & 89.2 \\
+    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
+    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
+    \bottomrule
+    \end{tabular}
+\end{table*}
 
 \subsection{Multi-Label Learning from Single Positive Labels}
 The original implementation was developed with older library versions, specifically PyTorch 1.7.0+cu110, and Torchvision 0.8.1+cu110. In contrast, our reproduction was conducted using PyTorch 2.2.1+cu121, and Torchvision 0.17.1+cu121. The original implementation had unknown versions of Python and CUDA, whereas our experiments were conducted using python 3.11.8 and CUDA 12.4. Despite keeping the code unchanged, and using the original random seed, differences in default behavior between library versions may cause deviations in results. Nevertheless, all code ran without modification, and we verified that training and evaluation completed successfully.
@@ -381,29 +398,13 @@ The final results reported for MS-COCO were obtained using the hyperparameters t
 This section presents the findings of our experiments, comparing the reproduced results for Query2Label and MLSPL with those reported in the respective papers. The discussion focuses on whether these methods successfully address the challenges of multi-label classification: feature localization and sparse supervision.
 
 
+
 \subsection{Results from Query2Label}
 Table \ref{tab:q2l_map_comparison} compares our results with the original Query2Label paper across various backbones. We observe that our reproduced mean average precision (mAP) scores match the original results across all configurations. For example, with a CvT backbone, both our implementation and the original achieved an mAP of 91.3\%.
 
 This consistency demonstrates that the publicly available pretrained models function as intended on our specific hardware configuration. However, attempts to train the model using transformer backbones like CvT-w24 and SwinL failed due to hardware memory limitations. With CNN-based backbones, training was successfully initialized using a reduced batchsize, confirming that the pipeline works under constrained settings. Overall, our experiments show that the Query2Label framework effectively tackles the feature localization under label imbalance, given appropriate computational resources.
 
-\begin{table*}[t]
-    \small
-    \caption{Comparison of mAP results from our experiments and the reported results on Query2Label on the MS-COCO 2014 Dataset.}
-    \label{tab:q2l_map_comparison}
-    \centering
-    \begin{tabular}{l l l c c}
-    \toprule
-    \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
-    \midrule
-    Q2L-R101     & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
-    Q2L-R101     & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
-    Q2L-TresL    & TResNetL       & $448\times448$ & 87.3 & 87.3 \\
-    Q2L-Tres     & TResNetL(22k)  & $448\times448$ & 89.2 & 89.2 \\
-    Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
-    Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
-    \bottomrule
-    \end{tabular}
-\end{table*}
+
 
 \subsection{Results from Multi-Label Learning from Single Positive Labels}
 Our implementation of MLSPL also achieved mAP values close to those reported in the original paper. As shown in table \ref{tab:MLSPL_map_comparison}, our linear classifier trained using ROLE loss achieved an mAP of 66.3\%, consistent with the reported baseline. Interestingly, our fine-tuned ROLE model slightly exceeded the original, scoring 66.9\% versus the reported 66.3\%. Discrepancies between our experiments and the original results are minimal and can be attributed to differences in software versions and hardware configurations. Nevertheless, our findings validate the reproducibility and effectiveness of ROLE's joint optimization of classifier and label estimator.
@@ -437,11 +438,16 @@ On the other hand, the implementation of MLSPL ran without resource constraints.
 
 Multi-label classification continues to mature as novel training methods and frameworks are discovered and refined.  Innovation in the field multi-label classification shows potential as many recent novelties are introduced and unexplored variants of the classification problems are investigated. 
 
+\appendices
+\section{Author Contributions}
 
+\noindent \textbf{Christine Midtgaard:} Conceptualization, Software, Validation, Investigation, Resources, Visualization, Writing - Original Draft, Writing - Review \& Editing, Supervision, Project administration. \textbf{Riajul Islam:} Writing - Original Draft. \textbf{Andreas Calonius Kreth:} Conceptualization, Resources, Visualization, Writing - Original Draft, Writing - Review \& Editing, Project administration.
+
+\section{Declaration of use of Generative Artificial Intelligence (GAI)}
+\noindent We used generative artificial intelligence (GAI) to complete this project, specifically OpenAI's GPT-4o. We used GAI tools in the following way: for alternative ways of formulating text. Afterwards, we have reviewed and edited the content as needed to ensure its accuracy. We take full responsibility for the content of this project. 
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
-
 
 
 
