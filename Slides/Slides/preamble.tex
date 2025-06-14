@@ -1,0 +1,76 @@
+\usetheme{metropolis}
+%\usecolortheme{beaver}
+
+% Custom colors
+\definecolor{myPrimary}{RGB}{19, 38, 92} % Forest green
+\definecolor{mySecondary}{RGB}{70, 130, 180} % Steel blue
+% Set background to white
+\setbeamercolor{background canvas}{bg=white}
+
+\setbeamercolor{normal text}{fg=myPrimary}
+\setbeamercolor{frametitle}{bg=myPrimary,fg=white}
+\setbeamercolor{title}{fg=myPrimary}
+\setbeamercolor{block title}{bg=mySecondary,fg=white}
+\setbeamercolor{block body}{bg=gray!10}
+
+\usepackage[utf8]{inputenc}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercovered{transparent}
+\AtBeginSection{}
+
+\usepackage{graphicx} % For including images (optional)
+\usepackage{multicol} % For multiple columns
+\usepackage{tabularx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{caption}
+%\captionsetup{font=small}
+\setbeamerfont{caption}{size=\tiny}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{lmodern}
+
+\usepackage[backend=biber,style=numeric]{biblatex} % Replace 'plain' with your desired style
+\addbibresource{references.bib} % Your .bib file
+\setbeamerfont{bibliography item}{size=\footnotesize}
+\setbeamerfont{bibliography entry author}{size=\footnotesize}
+\setbeamerfont{bibliography entry title}{size=\footnotesize}
+\setbeamerfont{bibliography entry location}{size=\footnotesize}
+\setbeamerfont{bibliography entry note}{size=\footnotesize}
+\usepackage{subcaption}
+
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+\tikzstyle{block} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+% Remove the progress bar and add page numbers
+\setbeamertemplate{footline}{%
+    \leavevmode%
+    \hbox{%
+        \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1ex]{author in head/foot}%
+            \hspace*{1em} % Left margin (optional)
+            Slide \insertframenumber{} of \inserttotalframenumber % Page numbers
+            \hfill % Right alignment
+        \end{beamercolorbox}%
+    }%
+}
+
+\title{Computer Vision}
+\subtitle{Multi-Label Image Classification \\ Query2Label \& MLSPL}
+\author{Group 25 \\ Riajul Islam, Andreas C. Kreth, Christine Midtgaard}
+\institute
+{
+  Aarhus University
+}
+\date{June 19, 2025}
+
+% Add the university logo
+\titlegraphic{\vspace{-0.2cm} % Adjust to move logo up or down
+\hspace{9cm}    % Adjust to move logo to the right
+\includegraphics[width=2cm]{Images/aulogoblue.png} }
