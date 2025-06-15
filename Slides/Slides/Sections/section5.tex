@@ -1,19 +1,42 @@
 \section{Results}
 
-\begin{frame}{Results: Q2L (mAP)}
-  \begin{itemize}
-    \item ResNet‑101 448$^2$ → \textbf{84.9\%}.
-    \item TResNet‑L‑22k 448$^2$ → \textbf{89.2\%}.
-    \item CvT‑w24‑22k 384$^2$ → \textbf{91.3\%} (SOTA).
-  \end{itemize}
+\begin{frame}{Results}
+  \textbf{Q2L}
+  \begin{table}
+      \centering
+        \caption{\small Mean Average Precision (mAP) comparison between our reproduced results and the Q2L paper on MS-COCO 2014. All values in percentage.}
+      \scalebox{0.85}{ % Scale down the table
+      \begin{tabular}{l l l c c}
+          \toprule
+          \textbf{Method} & \textbf{Backbone} & \textbf{Resolution} & \textbf{mAP (Ours)} & \textbf{mAP (Paper)} \\
+          \midrule
+          Q2L-R101     & ResNet-101     & $448\times448$ & 84.9 & 84.9 \\
+          Q2L-R101     & ResNet-101     & $576\times576$ & 86.5 & 86.5 \\
+          Q2L-TresL    & TResNetL       & $448\times448$ & 87.3 & 87.3 \\
+          Q2L-Tres     & TResNetL(22k)  & $448\times448$ & 89.2 & 89.2 \\
+          Q2L-SwinL    & Swin-L(22k)    & $384\times384$ & 90.5 & 90.5 \\
+          Q2L-CvT      & CvT-w24(22k)   & $384\times384$ & 91.3 & 91.3 \\
+          \bottomrule
+      \end{tabular}
+      }
+  \end{table}
 \end{frame}
 %-------------------------------------------------
 
-\begin{frame}{Results: MLSPL (ROLE)}
-  \begin{itemize}
-    \item Linear classifier → \textbf{66.3\% mAP}.
-    \item Fine‑tuned ResNet‑50 → \textbf{66.9\% mAP} (\,> paper).
-    \item Achieved with 20× fewer true labels.
-  \end{itemize}
+\begin{frame}{Result}
+  \textbf{MLSPL}
+  \begin{table}[H]
+      \caption{Comparison of mean Average Precision (mAP) results between our implementation and the originally reported values for the MLSPL $\mathcal{L}_{ROLE}$ method on the MS-COCO 2014 dataset. Results are shown for both linear and fine-tuned variants. All mAP values are reported in percentage.}
+      \label{tab:MLSPL_map_comparison}
+      \centering
+      \begin{tabular}{l l c c}
+      \toprule
+      \textbf{Loss} & \textbf{Method} & \textbf{mAP(Ours)} & \textbf{mAP (Paper)} \\
+      \midrule
+      $\mathcal{L}_{ROLE}$ & Linear & 66.3 & 66.3 \\
+      $\mathcal{L}_{ROLE}$ & Fine-Tuned & 66.9 & 66.3 \\
+      \bottomrule
+      \end{tabular}
+  \end{table}
 \end{frame}
 %-------------------------------------------------

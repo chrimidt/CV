@@ -17,7 +17,8 @@ Classification (Q2L)
 \end{frame}
 %-------------------------------------------------
 
-\begin{frame}{Q2L Architecture}
+\begin{frame}{Method}
+  \textbf{Q2L Architecture}
   \begin{itemize}
     \item Stage 1: CNN/ViT backbone extracts spatial features.
     \item Stage 2: Multi‑layer Transformer decoder with $K$ queries.
@@ -27,16 +28,17 @@ Classification (Q2L)
 \end{frame}
 %-------------------------------------------------
 
-\begin{frame}{Q2L Training Setup}
-  \begin{itemize}
-    \item 80 epochs, AdamW, RandAugment, EMA.
-    \item Backbones: ResNet‑101, TResNet‑L, Swin‑L, CvT‑w24.
-    \item Memory constraints encountered on 12 GB GPUs.
-  \end{itemize}
-\end{frame}
-%-------------------------------------------------
+% \begin{frame}{Q2L Training Setup}
+%   \begin{itemize}
+%     \item 80 epochs, AdamW, RandAugment, EMA.
+%     \item Backbones: ResNet‑101, TResNet‑L, Swin‑L, CvT‑w24.
+%     \item Memory constraints encountered on 12 GB GPUs.
+%   \end{itemize}
+% \end{frame}
+% %-------------------------------------------------
 
-\begin{frame}{MLSPL: Learning from One Positive Label}
+\begin{frame}{Method}
+  \textbf{MLSPL: Learning from One Positive Label}
   \begin{itemize}
     \item Extreme weak supervision: exactly \textbf{one} positive per image.
     \item Objective: recover missing positives during training.
@@ -44,20 +46,15 @@ Classification (Q2L)
 \end{frame}
 %-------------------------------------------------
 
-\begin{frame}{ROLE: Regularised Online Label Estimation}
+\begin{frame}{Method}
+  \textbf{ROLE: Regularised Online Label Estimation}
   \begin{itemize}
     \item Maintain soft estimates $\hat{y}$ for unobserved labels.
     \item Jointly optimise classifier \& label estimator.
-    \item Batch‑level regulariser keeps expected positives $\approx \kappa$.
+    \item Batch-level regulariser keeps expected positives $\approx \kappa$.
   \end{itemize}
 \end{frame}
+
 %-------------------------------------------------
 
-\begin{frame}{Dataset: MS--COCO 2014}
-  \begin{itemize}
-    \item 82 k train / 40 k val images, 80 object categories.
-    \item Avg. 2.9 labels / image.
-    \item Single‑positive variant generated for MLSPL.
-  \end{itemize}
-\end{frame}
-%-------------------------------------------------
+
