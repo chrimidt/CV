@@ -57,11 +57,12 @@
 \begin{frame}{Background}
   \begin{columns}
     \begin{column}{0.55\textwidth}
-      \textbf{Why Loss Functions Matter}
+      \textbf{Loss functions}
       \begin{itemize}
-        \item \textbf{Loss:} distance between model output and ground truth.
+        \item Measures distance between prediction (model output) and ground truth.
         \item Guides parameter optimization.
         \item Multi-label learning adds complexity: an image may trigger multiple simultaneous decisions.
+        \item Choosing an appropriate loss is therefore important.
       \end{itemize}
     \end{column}
 
@@ -95,80 +96,122 @@
 
 %-------------------------------------------------
 
-\begin{frame}{Binary Cross--Entropy (BCE)}
-\textbf{Use--case:} Independent yes/no decision per class.\\[0.4em]
-\begin{equation*}
-\mathcal{L}_{\text{BCE}} = -\frac{1}{K}\sum_{i=1}^{K}\bigl[y_i\log p_i + (1-y_i)\log(1-p_i)\bigr]
-\end{equation*}
-\begin{itemize}
-  \item $K$: number of classes; $y_i\in\{0,1\}$, $p_i\in[0,1]$.
-  \item Widely used baseline metric.
-\end{itemize}
+\begin{frame}{Background}
+\textbf{Binary Cross-Entropy (BCE):} 
+  \begin{itemize}
+    \item Independent positive/negative prediction per class: $y_i\in\{0,1\}$
+    \item Model outputs probability $p_i \in [0,1]$ for each class $i\in\{1,\dots,K\}$.
+  \end{itemize}
+  \vspace{0.4em}
+  \begin{equation*}
+    \mathcal{L}_{\text{BCE}} = -\frac{1}{K}\sum_{i=1}^{K}\bigl[y_i\log p_i + (1-y_i)\log(1-p_i)\bigr]
+  \end{equation*}
+  % \begin{itemize}
+  %   \item $K$: number of classes; $y_i\in\{0,1\}$, $p_i\in[0,1]$.
+  %   \item Widely used baseline metric.
+  % \end{itemize}
 \end{frame}
 
 %-------------------------------------------------
 
-\begin{frame}{BCE in Practice: Limitations}
+\begin{frame}{Background}
+  \textbf{BCE limitations:}
 \begin{itemize}
-  \item \textbf{Class imbalance:} gradients dominated by frequent classes \textrightarrow{} rare classes under--represented.
-  \item \textbf{Missing labels:} datasets rarely fully annotated. BCE treats unobserved labels as negatives, introducing false--negative bias.
+  \item \textbf{Class imbalance:} gradients dominated by frequent classes \textrightarrow{} rare classes under-represented.
+  \item \textbf{Missing labels:} datasets rarely fully annotated. BCE treats unobserved labels as negatives, introducing false-negative bias.
 \end{itemize}
-\vspace{0.5em}
-\centering
-\includegraphics[width=0.55\linewidth]{Images/loss_optimization.png}\\
-\scriptsize Example of sparse annotation (only one label per image).
+  \vspace{0.5em}
+  Positive-only BCE used when only the observed positive label $z_{ni}=1$ is known:
+  \begin{equation*}
+    \mathcal{L}_{\text{BCE}}^{+}(\mathbf{f}_n,\mathbf{z}_n) = - \sum_{i=1}^{K} \mathbf{1}[z_{ni}=1] \log f_{ni}
+  \end{equation*}
 \end{frame}
 
 %-------------------------------------------------
-
-\begin{frame}{Expected Positive Regularisation (EPR)}
-\begin{equation*}
-\mathcal{L}_{\text{EPR}}(\mathbf{F}_B,\mathbf{Z}_B)=\frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{\text{BCE}}^{+}(\mathbf{f}_n,\mathbf{z}_n)+\lambda\bigl(\hat{\kappa}(\mathbf{F}_B)-\kappa\bigr)^{2}
-\end{equation*}
-\begin{itemize}
-  \item $\kappa$: expected positives per image (domain prior).
-  \item $\hat{\kappa}$: average predicted positives in the batch.
-  \item Penalises deviation from prior; mitigates false--positives when only few labels are observed.
-\end{itemize}
+\begin{frame}{Background}
+  \textbf{Expected Positive Regularisation (EPR)}
+    \begin{equation*}
+      \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n)+\lambda R_\kappa(\mathbf{F}_B)\text{,}
+    \end{equation*}
+  \begin{itemize}
+    \item $\kappa$: expected positives per image (domain prior).
+    \item $\hat{\kappa}$: average predicted positives in the batch.
+    \item Batch penalty: $    R_\kappa(\mathbf{F}_B) = \left(\frac{\hat{\kappa}(\mathbf{F}_B)-\kappa}{K}\right)^2$.
+  \end{itemize}
 \end{frame}
+
+% \begin{frame}{Background}
+%   \textbf{Expected Positive Regularisation (EPR)}
+% \begin{equation*}
+% \mathcal{L}_{\text{EPR}}(\mathbf{F}_B,\mathbf{Z}_B)=\frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{\text{BCE}}^{+}(\mathbf{f}_n,\mathbf{z}_n)+\lambda\bigl(\hat{\kappa}(\mathbf{F}_B)-\kappa\bigr)^{2}
+% \end{equation*}
+% \begin{itemize}
+%   \item $\kappa$: expected positives per image (domain prior).
+%   \item $\hat{\kappa}$: average predicted positives in the batch.
+%   \item Penalises deviation from prior: mitigates false-positives when only few labels are observed.
+% \end{itemize}
+% \end{frame}
 
 %-------------------------------------------------
 
-\begin{frame}{Regularised Online Label Estimation (ROLE)}
-\begin{columns}
-\begin{column}{0.55\textwidth}
-\begin{itemize}
-  \item Jointly trains \emph{classifier} $f(\cdot;\theta)$ and \emph{label--estimator} $g(\cdot;\varphi)$.
-  \item Alternating updates:
-    \[
-      \mathcal{L}'(F_B,Y_B)=\frac{1}{|B|}\sum_{n}\mathcal{L}_{\text{BCE}}(f_n,\operatorname{sg}(y_n))+\mathcal{L}_{\text{EPR}}
-    \]
-  \item Softly imputes missing labels ($0<y_{ni}<1$) and reduces false negatives.
-\end{itemize}
-\end{column}
-\begin{column}{0.45\textwidth}
-\centering
-\includegraphics[width=0.9\linewidth]{Images/loss_optimization.png}\\
-\scriptsize Classifier $\leftrightarrow{}$ Label--estimator loop.
-\end{column}
-\end{columns}
+\begin{frame}{Background}
+  \textbf{Regularised Online Label Estimation (ROLE)}
+  \begin{itemize}
+    \item Jointly trains classifier $f(\cdot;\theta)$ and label-estimator $g(\cdot;\phi)$.
+    \item Alternating updates:
+      \[
+        \mathcal{L}'(\mathbf{F}_B,\tilde{\mathbf{Y}}_B) = \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{BCE}(\mathbf{f}_n,\text{sg}(\tilde{\mathbf{y}}_n)) + \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B)
+      \]
+    \item Softly imputes missing labels ($0<y_{ni}<1$) and reduces false negatives.
+  \end{itemize}
+  \begin{equation*}
+    \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B|\mathbf{\tilde{Y}})+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
+  \end{equation*}
 \end{frame}
 
 %-------------------------------------------------
+\begin{frame}{Background}
+  \textbf{Focal loss}
+  \begin{equation*}
+    \mathcal{L}_{\text{FL}} = -\frac{1}{K}\sum_{i=1}^{K}\alpha_i(1-p_i)^{\gamma}y_i\log p_i
+  \end{equation*}
 
-\begin{frame}{Focal \& Asymmetric Focal Losses}
-\begin{itemize}
-  \item \textbf{Focal Loss (FL):} down--weights easy negatives, focuses on hard examples.
-    \[
-      \mathcal{L}_{\text{FL}} = -\frac{1}{K}\sum_{i=1}^{K}\alpha_i(1-p_i)^{\gamma}y_i\log p_i
-    \]
-  \item \textbf{Asymmetric Focal Loss (AFL):} separate focusing for positive/negative parts.
-    \[
-    \mathcal{L}_{\text{AFL}} = -\frac{1}{K}\sum_{i}\bigl[y_i(1-p_i)^{\gamma^{+}}\log p_i + (1-y_i)p_i^{\gamma^{-}}\log(1-p_i)\bigr]
-    \]
-  \item Useful when negatives hugely outnumber positives.
-\end{itemize}
+  \begin{itemize}
+    \item Down-weights easy examples; focuses on hard, misclassified ones.
+    \item Hyperparameters: focusing $\gamma$ and class weight $\alpha$.
+  \end{itemize}
 \end{frame}
+
+%-------------------------------------------------
+\begin{frame}{Background}
+  \textbf{Assymetric focal loss}
+  \begin{itemize}
+    \item Variant tailored for imbalance in multi-label settings.
+    \item Uses different focusing parameters for positive vs. negative terms.
+  \end{itemize}
+  \begin{equation*}
+    \mathcal{L} = \frac{1}{K} \sum_{k=1}^{K}
+    \begin{cases}
+      (1 - p_k)^{\gamma^+} \log(p_k), & \text{if } y_k = 1 \\
+      (p_k)^{\gamma^-} \log(1 - p_k), & \text{if } y_k = 0
+    \end{cases}
+  \end{equation*}
+  % Typically $\gamma^+ < \gamma^-$. Encourages recall on rare classes while suppressing negatives.
+\end{frame}
+
+% \begin{frame}{Focal \& Asymmetric Focal Losses}
+% \begin{itemize}
+%   \item \textbf{Focal Loss (FL):} down--weights easy negatives, focuses on hard examples.
+%     \[
+%       \mathcal{L}_{\text{FL}} = -\frac{1}{K}\sum_{i=1}^{K}\alpha_i(1-p_i)^{\gamma}y_i\log p_i
+%     \]
+%   \item \textbf{Asymmetric Focal Loss (AFL):} separate focusing for positive/negative parts.
+%     \[
+%     \mathcal{L}_{\text{AFL}} = -\frac{1}{K}\sum_{i}\bigl[y_i(1-p_i)^{\gamma^{+}}\log p_i + (1-y_i)p_i^{\gamma^{-}}\log(1-p_i)\bigr]
+%     \]
+%   \item Useful when negatives hugely outnumber positives.
+% \end{itemize}
+% \end{frame}
 
 %-------------------------------------------------
 
