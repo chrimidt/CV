@@ -82,7 +82,7 @@
             \item Binary Cross-Entropy (BCE)
             \item Expected Positive Regularisation (EPR)
             \item Regularised Online Label Estimation (ROLE)
-            \item Focal and Asymmetric Focal Losses
+            % \item Focal and Asymmetric Focal Losses
           \end{itemize}
     \end{column}
 
@@ -162,6 +162,7 @@
       \[
         \mathcal{L}'(\mathbf{F}_B,\tilde{\mathbf{Y}}_B) = \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{BCE}(\mathbf{f}_n,\text{sg}(\tilde{\mathbf{y}}_n)) + \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B)
       \]
+      $\mathbf{\tilde{Y}}\in[0,1]^{N\times K}$: matrix of estimated labels. \\$\mathbf{F}\in[0,1]^{N\times K}$: matrix of classifier predictions.
     \item Softly imputes missing labels ($0<y_{ni}<1$) and reduces false negatives.
   \end{itemize}
   \begin{equation*}
@@ -169,35 +170,44 @@
   \end{equation*}
 \end{frame}
 
-%-------------------------------------------------
 \begin{frame}{Background}
-  \textbf{Focal loss}
-  \begin{equation*}
-    \mathcal{L}_{\text{FL}} = -\frac{1}{K}\sum_{i=1}^{K}\alpha_i(1-p_i)^{\gamma}y_i\log p_i
-  \end{equation*}
-
-  \begin{itemize}
-    \item Down-weights easy examples; focuses on hard, misclassified ones.
-    \item Hyperparameters: focusing $\gamma$ and class weight $\alpha$.
-  \end{itemize}
+  \textbf{Regularised Online Label Estimation (ROLE)}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{Images/role2.PNG}
+    \caption*{Alternating updates of image classifier (f) and label estimator (g).}
+  \end{figure}
 \end{frame}
 
 %-------------------------------------------------
-\begin{frame}{Background}
-  \textbf{Assymetric focal loss}
-  \begin{itemize}
-    \item Variant tailored for imbalance in multi-label settings.
-    \item Uses different focusing parameters for positive vs. negative terms.
-  \end{itemize}
-  \begin{equation*}
-    \mathcal{L} = \frac{1}{K} \sum_{k=1}^{K}
-    \begin{cases}
-      (1 - p_k)^{\gamma^+} \log(p_k), & \text{if } y_k = 1 \\
-      (p_k)^{\gamma^-} \log(1 - p_k), & \text{if } y_k = 0
-    \end{cases}
-  \end{equation*}
-  % Typically $\gamma^+ < \gamma^-$. Encourages recall on rare classes while suppressing negatives.
-\end{frame}
+% \begin{frame}{Background}
+%   \textbf{Focal loss}
+%   \begin{equation*}
+%     \mathcal{L}_{\text{FL}} = -\frac{1}{K}\sum_{i=1}^{K}\alpha_i(1-p_i)^{\gamma}y_i\log p_i
+%   \end{equation*}
+
+%   \begin{itemize}
+%     \item Down-weights easy examples; focuses on hard, misclassified ones.
+%     \item Hyperparameters: focusing $\gamma$ and class weight $\alpha$.
+%   \end{itemize}
+% \end{frame}
+
+% %-------------------------------------------------
+% \begin{frame}{Background}
+%   \textbf{Assymetric focal loss}
+%   \begin{itemize}
+%     \item Variant tailored for imbalance in multi-label settings.
+%     \item Uses different focusing parameters for positive vs. negative terms.
+%   \end{itemize}
+%   \begin{equation*}
+%     \mathcal{L} = \frac{1}{K} \sum_{k=1}^{K}
+%     \begin{cases}
+%       (1 - p_k)^{\gamma^+} \log(p_k), & \text{if } y_k = 1 \\
+%       (p_k)^{\gamma^-} \log(1 - p_k), & \text{if } y_k = 0
+%     \end{cases}
+%   \end{equation*}
+%   % Typically $\gamma^+ < \gamma^-$. Encourages recall on rare classes while suppressing negatives.
+% \end{frame}
 
 % \begin{frame}{Focal \& Asymmetric Focal Losses}
 % \begin{itemize}

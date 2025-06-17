@@ -23,10 +23,10 @@
 
 \section*{Slide 0 - Title}
 
-Good morning everyone. Today I'll walk you through our project "Computer Vision - Multi-Label Image Classification: Query2Label and MLSPL". I'm Christine, presenting with Andreas and Riajul. This is a prsentation on our gorup project on multi-label learning in computer vision, and we will go into why multi-label learning matters, outline two complementary methods - Query2Label and ROLE loss from the papers "Query2Label: A Simple Transformer Way to Multi-Label Classification" and "Multi-Label Learning from Single Positive Labels", and describe how we reproduced them on MS-COCO 2014, and summarise the results.
+Today we'll walk you through our project "Computer Vision - Multi-Label Image Classification: Query2Label and MLSPL". I'm Christine, presenting with Andreas and Riajul. We will go into why multi-label learning matters, outline two complementary methods - Query2Label for feature recognision from the paper "Query2Label: A Simple Transformer Way to Multi-Label Classification", and ROLE loss for sparse annotations from the paper "Multi-Label Learning from Single Positive Labels", and describe how we reproduced them on MS-COCO 2014 benchmark dataset, and summarise the results.
 
 \section*{Background: Why loss functions matter}
-“Multi-label tasks differ from classic single-label classification because every image can contain several objects at once. That complicates training: the loss function must guide the network while coping with severe class imbalance and with labels that may simply be missing. Choosing that loss wisely is therefore crucial.
+Multi-label tasks differ from classic single-label classification because every image can contain several objects at once. That complicates training: the loss function must guide the network while coping with severe class imbalance and with labels that may simply be missing. Choosing that loss wisely is therefore crucial.
 
 \section*{Losses covered}
 In this study we focus on four families of losses.
@@ -47,8 +47,8 @@ EPR keeps the positive-only loss yet adds a batch-level penalty: we tell the net
 \section*{ROLE}
 ROLE goes one step further. Alongside the classifier f it trains a label estimator g. Alternating optimisation lets g fill in fractional labels between 0 and 1, while f learns from those estimates plus the EPR regulariser. Intuitively, the two networks bootstrap each other, slowly recovering unobserved positives.
 
-\section*{Focal and Asymmetric Focal}
-In parallel, focal losses reshape the BCE curve so that easy negatives contribute very little, while hard, ambiguous examples dominate. The asymmetric version lets us pick one focusing parameter for positives and another for negatives—extremely useful when positives are both scarce and more informative.
+% \section*{Focal and Asymmetric Focal}
+% In parallel, focal losses reshape the BCE curve so that easy negatives contribute very little, while hard, ambiguous examples dominate. The asymmetric version lets us pick one focusing parameter for positives and another for negatives—extremely useful when positives are both scarce and more informative.
 
 \section*{Experimental setup}
 Let me switch to implementation details.
