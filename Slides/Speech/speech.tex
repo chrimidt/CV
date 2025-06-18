@@ -35,17 +35,45 @@ Expected Positive Regularisation tries to nudge the model so that each image has
 ROLE—Regularised Online Label Estimation—alternates between updating the classifier and softly imputing missing labels.
 Finally, Focal and its Asymmetric variant down-weight easy negatives so that scarce positives get a stronger voice.
 
+\section*{Regularised Online Label Estimation (ROLE)}
+In this project, we explore the case of minimal supervision: the single positive label setting, where only one relevant class label is observed
+per image and the rest are unannotated. 
+
+The authors of MLSPL introduce an approach for training with single positive labels called ROLE. Here the idea is to optimize the labels and the image classifier simultaneously during training (Expectation-maximization algorithm). 
+
+The model learns to parameters: f and g. f is a standard image classifier where the output is a vector of per-class prediction based on an input image. g returns an estimated label vector for a given image ID n. g could return the appropriate row of differentiably parameterized label matrix. These estimated labels are used to supervise f. f is encouraged to predict observed positive labels correctly. 
+
+Expected number of positive labels per image ($\kappa$). This is a single fixed value for a given dataset. $\kappa$ is used to define a regularisation term that penalizes f for predicting too many or too few positives in a batch.
+
+g is updated using losses like those for f.
+
 \section*{Binary Cross-Entropy refresher}
-BCE treats each class independently: if the dog label is present we penalise the log probability of "dog"; if not, we penalise the log probability of its complement. But that independence causes two issues. First, because positives are rare, negatives dominate the gradient; and second, any label that is simply missing is interpreted as a definite "no", inserting false negatives.
+This is the most basic loss. It treats each label as separate and tries to predict whether it's present (1) or not (0).
+
+Problem:
+
+If many labels are missing, BCE treats them as 0s (negatives), even though we just don't know. This can confuse the model.
+
+Also, since most labels are usually negative, the model might focus more on those and ignore the rare positives.
 
 \section*{BCE limitations and Positive-only BCE}
-To mitigate the false-negative problem, practitioners sometimes discard all unobserved negatives and train only on positives—positive-only BCE. But that leaves the model with no incentive to predict zeroes, so we need extra regularisation, which brings us to EPR.
+To avoid false negatives, we train the model only on the labels we are sure about—the positives.
+Problem: Now the model has no reason to predict zeros, so we need extra rules to control its behavior; a regularization, which brings us to EPR.
 
 \section*{Expected Positive Regularisation}
-EPR keeps the positive-only loss yet adds a batch-level penalty: we tell the network the domain prior $\kappa$, roughly how many labels an image should contain, and we punish the squared distance between $\kappa$ and the average number its own predictions switch on. That soft constraint pulls the model back to reality without explicitly marking missing labels as negative.
+EPR keeps the positive-only loss yet adds a batch-level penalty: we tell the network the domain prior $\kappa$, roughly how many labels an image should contain, and we punish the squared distance between $\kappa$ and the average number its own predictions switch on. 
+
 
 \section*{ROLE}
-ROLE goes one step further. Alongside the classifier f it trains a label estimator g. Alternating optimisation lets g fill in fractional labels between 0 and 1, while f learns from those estimates plus the EPR regulariser. Intuitively, the two networks bootstrap each other, slowly recovering unobserved positives.
+ROLE goes one step further.
+We train two models at once:
+
+One is the usual classifier that predicts labels.
+
+The other estimates the labels we don't see.
+
+They learn from each other during training.
+The idea is that the second model can guess missing labels softly (not just 0 or 1), and the main model uses those guesses to improve.
 
 % \section*{Focal and Asymmetric Focal}
 % In parallel, focal losses reshape the BCE curve so that easy negatives contribute very little, while hard, ambiguous examples dominate. The asymmetric version lets us pick one focusing parameter for positives and another for negatives—extremely useful when positives are both scarce and more informative.
@@ -74,9 +102,6 @@ Here are the numbers. Our Q2L reproductions line up almost perfectly with the pa
 
 \section*{MLSPL results}
 For MLSPL, the linear variant hits 66.3 mAP—identical to the paper—and fine-tuning nudges it to 66.9, slightly surpassing the reported 66.3. So even when each training image has only a single confirmed label, ROLE recovers roughly two-thirds of fully supervised performance on COCO.
-
-
-
 
 
 \end{document}
