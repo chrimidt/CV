@@ -29,7 +29,6 @@ Today we'll walk you through our project "Computer Vision - Multi-Label Image Cl
 Multi-label tasks differ from classic single-label classification because every image can contain several objects at once. That complicates training: the loss function must guide the network while coping with severe class imbalance and with labels that may simply be missing. Choosing that loss wisely is therefore crucial.
 
 \section*{Losses covered}
-In this study we focus on four families of losses.
 Binary Cross-Entropy is the standard baseline.
 Expected Positive Regularisation tries to nudge the model so that each image has roughly the expected number of positives.
 ROLE—Regularised Online Label Estimation—alternates between updating the classifier and softly imputing missing labels.
@@ -41,7 +40,7 @@ per image and the rest are unannotated.
 
 The authors of MLSPL introduce an approach for training with single positive labels called ROLE. Here the idea is to optimize the labels and the image classifier simultaneously during training (Expectation-maximization algorithm). 
 
-The model learns to parameters: f and g. f is a standard image classifier where the output is a vector of per-class prediction based on an input image. g returns an estimated label vector for a given image ID n. g could return the appropriate row of differentiably parameterized label matrix. These estimated labels are used to supervise f. f is encouraged to predict observed positive labels correctly. 
+The model learns two parameters: f and g. f is a standard image classifier where the output is a vector of per-class prediction based on an input image. g returns an estimated label vector for a given image ID n. g could return the appropriate row of differentiably parameterized label matrix. These estimated labels are used to supervise f. f is encouraged to predict observed positive labels correctly. 
 
 Expected number of positive labels per image ($\kappa$). This is a single fixed value for a given dataset. $\kappa$ is used to define a regularisation term that penalizes f for predicting too many or too few positives in a batch.
 
@@ -92,7 +91,7 @@ We evaluated six backbones inside the Q2L framework:
 ResNet-101 at resolutions 448 and 576,
 TResNet-L with and without ImageNet-22k pre-training,
 and two transformer-style models: Swin-Large and CvT-w24.
-Memory overflow forced us to omit Swin and CvT from scratch, so we fine-tuned their 22k-pre-trained weights.
+Due to time constraints, the evaluation is based on pretrained models made publicly available by the authors. However, the training of the backbones were initialized, which yielded memory overflow by the Swin and CvT architectures, even with the lowest batchsize. The other backbones could be trained with a lower batchsize.
 
 \section*{MLSPL protocol}
 For MLSPL we follow the paper exactly. Each image is reduced to a single positive label. We first train a linear classifier on frozen features for 25 epochs, grid-search learning rate and batch size, and then fine-tune end-to-end for another 10 epochs with a smaller learning rate.
