@@ -55,115 +55,125 @@
 
 
 
+
+
+%-------------------------------------------------
+\begin{frame}{Background}
+  \textbf{Multi-label Learning From Single Positive Labels}
+  \begin{itemize}
+    \item One image - multiple labels - only one positive label.
+    \item All other labels are unobserved, not confirmed negatives.
+    \item Binary Cross-Entropy (BCE) fails: missing label is assumed negative - false negatives.
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Background}
+%   \begin{columns}
+%     \begin{column}{0.55\textwidth}
+%       \textbf{Loss functions}
+%       \begin{itemize}
+%         \item Measures distance between prediction (model output) and ground truth.
+%         \item Guides parameter optimization by minimizing the loss.
+%       \end{itemize}
+%     \end{column}
+
+%     \begin{column}{0.45\textwidth}
+%       \centering
+%       \includegraphics[width=0.9\linewidth]{Images/loss_optimization.png}\\
+%       \scriptsize Illustration of a loss landscape.
+%     \end{column}
+%   \end{columns}
+% \end{frame}
+
+
+
+%-------------------------------------------------
+
+% \begin{frame}{Background}
+% \textbf{Binary Cross-Entropy (BCE):} 
+%   \begin{itemize}
+%     \item Independent positive/negative prediction per class: $y_i\in\{0,1\}$
+%     \item Model outputs probability $p_i \in [0,1]$ for each class $i\in\{1,\dots,K\}$.
+%   \end{itemize}
+%   \vspace{0.4em}
+%   \begin{equation*}
+%     \mathcal{L}_{\text{BCE}} = -\frac{1}{K}\sum_{i=1}^{K}\bigl[y_i\log p_i + (1-y_i)\log(1-p_i)\bigr]
+%   \end{equation*}
+% \end{frame}
+
+% %-------------------------------------------------
+
+% \begin{frame}{Background}
+%   \textbf{BCE limitations:}
+% \begin{itemize}
+%   \item \textbf{Class imbalance:} gradients dominated by frequent classes \textrightarrow{} rare classes under-represented.
+%   \item \textbf{Missing labels:} datasets rarely fully annotated. BCE treats unobserved labels as negatives, introducing false-negative bias.
+% \end{itemize}
+%   \vspace{0.5em}
+%   Positive-only BCE used when only the observed positive label $z_{ni}=1$ is known:
+%   \begin{equation*}
+%     \mathcal{L}_{\text{BCE}}^{+}(\mathbf{f}_n,\mathbf{z}_n) = - \sum_{i=1}^{K} \mathbf{1}[z_{ni}=1] \log f_{ni}
+%   \end{equation*}
+% \end{frame}
+
+%-------------------------------------------------
+
+% \begin{frame}{Background}
+%   \textbf{Expected Positive Regularisation (EPR)}
+%     \begin{equation*}
+%       \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n)+\lambda R_\kappa(\mathbf{F}_B)\text{,}
+%     \end{equation*}
+%   \begin{itemize}
+%     \item $\kappa$: expected positives per image (domain prior).
+%     \item $\hat{\kappa}$: average predicted positives in the batch.
+%     \item $\mathbf{F}\in[0,1]^{N\times K}$: matrix of classifier predictions.
+%     \item $\mathbf{\tilde{Y}}\in[0,1]^{N\times K}$: matrix of estimated labels.
+%     \item $\mathbf{Z}_B$: fixed partial labels. 
+%     \item Batch penalty: $R_\kappa(\mathbf{F}_B) = \left(\frac{\hat{\kappa}(\mathbf{F}_B)-\kappa}{K}\right)^2$.
+%   \end{itemize}
+% \end{frame}
+
 %-------------------------------------------------
 
 \begin{frame}{Background}
   \textbf{Regularised Online Label Estimation (ROLE)}
+  \begin{itemize}
+    \item Jointly train a classifier $f$ and a label estimator $g$.
+    \item Missing labels are treated as unknown - a separate label estimator assigns them soft probabilities.
+    \item Enforce expected number of positives via batch-level regularization.
+  \end{itemize}
   \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/role2.PNG}
+    \includegraphics[width=0.7\linewidth]{Images/role2.PNG}
     \caption*{Alternating updates of image classifier (f) and label estimator (g).}
   \end{figure}
 \end{frame}
 
 %-------------------------------------------------
 \begin{frame}{Background}
-  \begin{columns}
-    \begin{column}{0.55\textwidth}
-      \textbf{Loss functions}
-      \begin{itemize}
-        \item Measures distance between prediction (model output) and ground truth.
-        \item Guides parameter optimization by minimizing the loss.
-      \end{itemize}
-    \end{column}
-
-    \begin{column}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.9\linewidth]{Images/loss_optimization.png}\\
-      \scriptsize Illustration of a loss landscape.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Background}
-  \begin{columns}
-    \begin{column}{0.55\textwidth}
-      \textbf{Loss functions}
-          \begin{itemize}
-            \item Binary Cross-Entropy (BCE)
-            \item Expected Positive Regularisation (EPR)
-            \item Regularised Online Label Estimation (ROLE)
-            % \item Focal and Asymmetric Focal Losses
-          \end{itemize}
-    \end{column}
-
-    \begin{column}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.9\linewidth]{Images/loss_optimization.png}\\
-      \scriptsize Illustration of a loss landscape.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-%-------------------------------------------------
-
-\begin{frame}{Background}
-\textbf{Binary Cross-Entropy (BCE):} 
+   ROLE: loss function tailored for sparse supervision by alternating updates:
+  \[
+    \mathcal{L}'(\mathbf{F}_B,\tilde{\mathbf{Y}}_B) = \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{BCE}(\mathbf{f}_n,\text{sg}(\tilde{\mathbf{y}}_n)) + \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B)
+  \]
   \begin{itemize}
-    \item Independent positive/negative prediction per class: $y_i\in\{0,1\}$
-    \item Model outputs probability $p_i \in [0,1]$ for each class $i\in\{1,\dots,K\}$.
+    \item $\mathcal{L}_{BCE}$ term: encourages the classifier predictions $\mathbf{F}_B$ to match the estimated labels $\tilde{\mathbf{Y}}_B$.
+    \item  $\mathcal{L}_{EPR}$ term: enforces correct predictions for known positives and penalizes deviations from the expected number of positives per image.
   \end{itemize}
-  \vspace{0.4em}
-  \begin{equation*}
-    \mathcal{L}_{\text{BCE}} = -\frac{1}{K}\sum_{i=1}^{K}\bigl[y_i\log p_i + (1-y_i)\log(1-p_i)\bigr]
+  Here, $\mathcal{L}_{EPR}$ is given by:
+  \[
+    \mathcal{L}_{\text{EPR}}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{\text{BCE}}^{+}(\mathbf{f}_n,\mathbf{z}_n) + \lambda\bigl(\frac{\hat{\kappa}(\mathbf{F}_B) - \kappa}{K}\bigr)^2
+  \]
 \end{frame}
 
-%-------------------------------------------------
-
 \begin{frame}{Background}
-  \textbf{BCE limitations:}
-\begin{itemize}
-  \item \textbf{Class imbalance:} gradients dominated by frequent classes \textrightarrow{} rare classes under-represented.
-  \item \textbf{Missing labels:} datasets rarely fully annotated. BCE treats unobserved labels as negatives, introducing false-negative bias.
-\end{itemize}
-  \vspace{0.5em}
-  Positive-only BCE used when only the observed positive label $z_{ni}=1$ is known:
-  \begin{equation*}
-    \mathcal{L}_{\text{BCE}}^{+}(\mathbf{f}_n,\mathbf{z}_n) = - \sum_{i=1}^{K} \mathbf{1}[z_{ni}=1] \log f_{ni}
-  \end{equation*}
-\end{frame}
-
-%-------------------------------------------------
-
-\begin{frame}{Background}
-  \textbf{Expected Positive Regularisation (EPR)}
-    \begin{equation*}
-      \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B) = \frac{1}{|B|}\sum_{n\in B}\mathcal{L}_{BCE}^+(\mathbf{f}_n,\mathbf{z}_n)+\lambda R_\kappa(\mathbf{F}_B)\text{,}
-    \end{equation*}
-  \begin{itemize}
-    \item $\kappa$: expected positives per image (domain prior).
-    \item $\hat{\kappa}$: average predicted positives in the batch.
-    \item $\mathbf{F}\in[0,1]^{N\times K}$: matrix of classifier predictions.
-    \item $\mathbf{\tilde{Y}}\in[0,1]^{N\times K}$: matrix of estimated labels.
-    \item $\mathbf{Z}_B$: fixed partial labels. 
-    \item Batch penalty: $R_\kappa(\mathbf{F}_B) = \left(\frac{\hat{\kappa}(\mathbf{F}_B)-\kappa}{K}\right)^2$.
-  \end{itemize}
-\end{frame}
-
-%-------------------------------------------------
-
-\begin{frame}{Background}
-  \textbf{Regularised Online Label Estimation (ROLE)}\\
-    Alternating updates:
-      \[
-        \mathcal{L}'(\mathbf{F}_B,\tilde{\mathbf{Y}}_B) = \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{BCE}(\mathbf{f}_n,\text{sg}(\tilde{\mathbf{y}}_n)) + \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B)
-      \]
-
   Final equation:
   \begin{equation*}
     \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B|\mathbf{\tilde{Y}})+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
   \end{equation*}
+  where $\mathbf{F}_B$ and $\tilde{\mathbf{Y}}_B$ are updated simultaneously.
 \end{frame}
+
+
 
 % \begin{frame}{Background}
 %   \textbf{Expected Positive Regularisation (EPR)}

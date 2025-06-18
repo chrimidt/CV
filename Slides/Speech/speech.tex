@@ -25,66 +25,62 @@
 
 Today we'll walk you through our project "Computer Vision - Multi-Label Image Classification: Query2Label and MLSPL". I'm Christine, presenting with Andreas and Riajul. We will go into why multi-label learning matters, outline two complementary methods - Query2Label for feature recognision from the paper "Query2Label: A Simple Transformer Way to Multi-Label Classification", and ROLE loss for sparse annotations from the paper "Multi-Label Learning from Single Positive Labels", and describe how we reproduced them on MS-COCO 2014 benchmark dataset, and summarise the results.
 
-\section*{Background: Why loss functions matter}
-Multi-label tasks differ from classic single-label classification because every image can contain several objects at once. That complicates training: the loss function must guide the network while coping with severe class imbalance and with labels that may simply be missing. Choosing that loss wisely is therefore crucial.
-
-\section*{Losses covered}
-Binary Cross-Entropy is the standard baseline.
-Expected Positive Regularisation tries to nudge the model so that each image has roughly the expected number of positives.
-ROLE—Regularised Online Label Estimation—alternates between updating the classifier and softly imputing missing labels.
-Finally, Focal and its Asymmetric variant down-weight easy negatives so that scarce positives get a stronger voice.
+\section*{Multi-label Learning From Single Positive Labels}
+In multi-label classification, an image can belong to several categories.
+However, in the MLSPL setting, we only know one positive label per image.
+All other labels are unobserved—not confirmed negatives.
+This makes standard losses like Binary Cross-Entropy problematic, because they treat missing labels as negative, which introduces many false negatives and hurts performance.
 
 \section*{Regularised Online Label Estimation (ROLE)}
-In this project, we explore the case of minimal supervision: the single positive label setting, where only one relevant class label is observed
-per image and the rest are unannotated. 
+The authors of MLSPL propose a new approach called ROLE — Regularised Online Label Estimation — to directly address this.
+Instead of assuming unobserved labels are negative, they train two models jointly:
 
-The authors of MLSPL introduce an approach for training with single positive labels called ROLE. Here the idea is to optimize the labels and the image classifier simultaneously during training (Expectation-maximization algorithm). 
+A classifier f that makes predictions, and
 
-The model learns two parameters: f and g. f is a standard image classifier where the output is a vector of per-class prediction based on an input image. g returns an estimated label vector for a given image ID n. g could return the appropriate row of differentiably parameterized label matrix. These estimated labels are used to supervise f. f is encouraged to predict observed positive labels correctly. 
+A label estimator g that assigns soft probabilities to the unknown labels.
 
-Expected number of positive labels per image ($\kappa$). This is a single fixed value for a given dataset. $\kappa$ is used to define a regularisation term that penalizes f for predicting too many or too few positives in a batch.
+They also include a regularization term that encourages each image to have a realistic number of positive labels.
+The training alternates between updating f and g, refining both over time.
 
-g is updated using losses like those for f.
+\section*{The ROLE Loss Function}
+This idea is encoded directly in the loss function.
+The ROLE loss has two main parts:
 
-\section*{Binary Cross-Entropy refresher}
-This is the most basic loss. It treats each label as separate and tries to predict whether it's present (1) or not (0).
+The LBCE term encourages the classifier predictions to match the estimated soft labels.
 
-Problem:
+The LEPR term ensures the model still predicts known positives, and it penalizes the model if it predicts too many or too few labels overall.
 
-If many labels are missing, BCE treats them as 0s (negatives), even though we just don't know. This can confuse the model.
+This formulation lets the model learn to recover missing labels without falsely treating them as negatives.
 
-Also, since most labels are usually negative, the model might focus more on those and ignore the rare positives.
+% \section*{The ROLE Loss Function}
+% In this project, we explore the case of minimal supervision: the single positive label setting, where only one relevant class label is observed
+% per image and the rest are unannotated. 
 
-\section*{BCE limitations and Positive-only BCE}
-To avoid false negatives, we train the model only on the labels we are sure about—the positives.
-Problem: Now the model has no reason to predict zeros, so we need extra rules to control its behavior; a regularization, which brings us to EPR.
+% The authors of MLSPL introduce an approach for training with single positive labels called ROLE. Here the idea is to optimize the labels and the image classifier simultaneously during training (Expectation-maximization algorithm). 
 
-\section*{Expected Positive Regularisation}
-EPR keeps the positive-only loss yet adds a batch-level penalty: we tell the network the domain prior $\kappa$, roughly how many labels an image should contain, and we punish the squared distance between $\kappa$ and the average number its own predictions switch on. 
+% The model learns two parameters: f and g. f is a standard image classifier where the output is a vector of per-class prediction based on an input image. g returns an estimated label vector for a given image ID n. g could return the appropriate row of differentiably parameterized label matrix. These estimated labels are used to supervise f. f is encouraged to predict observed positive labels correctly. 
+
+% Expected number of positive labels per image ($\kappa$). This is a single fixed value for a given dataset. $\kappa$ is used to define a regularisation term that penalizes f for predicting too many or too few positives in a batch.
+
+% g is updated using losses like those for f.
 
 
-\section*{ROLE}
-ROLE goes one step further.
-We train two models at once:
 
-One is the usual classifier that predicts labels.
+\section*{Final Loss Equation}
+These components come together in the final ROLE loss:
+It averages the classifier-to-estimator and estimator-to-classifier objectives.
+This symmetric design helps both models improve in tandem — refining predictions and label estimates together.
 
-The other estimates the labels we don't see.
-
-They learn from each other during training.
-The idea is that the second model can guess missing labels softly (not just 0 or 1), and the main model uses those guesses to improve.
-
-% \section*{Focal and Asymmetric Focal}
-% In parallel, focal losses reshape the BCE curve so that easy negatives contribute very little, while hard, ambiguous examples dominate. The asymmetric version lets us pick one focusing parameter for positives and another for negatives—extremely useful when positives are both scarce and more informative.
 
 \section*{Experimental setup}
-Let me switch to implementation details.
-We reproduced Q2L and MLSPL on two RTX 3060 GPUs.
-For Q2L we matched the authors’ environment: Python 3.7, PyTorch 1.9 and minor patches such as rebuilding inplace-ABN and importing RandAugment.
-For MLSPL, which is lighter, we used Python 3.11 and PyTorch 2.2 on a single GPU to guarantee repeatability.
+For our experiments, we used two NVIDIA RTX 3060 GPUs and ran both Q2L and MLSPL implementations.
+We adapted the environment for Q2L due to some package mismatches, particularly for RandAugment.
+For MLSPL, we used a more recent PyTorch version and ran all experiments on a single GPU for consistency.
 
 \section*{Dataset and metric}
-All experiments run on the MS-COCO 2014 benchmark—82 thousand training and 40 thousand validation images across 80 categories, each image resized to 448 or 576 pixels. Performance is reported in mean Average Precision, or mAP, the standard metric for multi-label classification.
+The dataset used was MS-COCO 2014, which includes over 120,000 images and 80 object categories.
+Each image can have multiple labels, making it ideal for multi-label classification.
+We report results using mean Average Precision (mAP), which is standard in this task.
 
 \section*{Q2L backbones}
 We evaluated six backbones inside the Q2L framework:
@@ -94,13 +90,19 @@ and two transformer-style models: Swin-Large and CvT-w24.
 Due to time constraints, the evaluation is based on pretrained models made publicly available by the authors. However, the training of the backbones were initialized, which yielded memory overflow by the Swin and CvT architectures, even with the lowest batchsize. The other backbones could be trained with a lower batchsize.
 
 \section*{MLSPL protocol}
-For MLSPL we follow the paper exactly. Each image is reduced to a single positive label. We first train a linear classifier on frozen features for 25 epochs, grid-search learning rate and batch size, and then fine-tune end-to-end for another 10 epochs with a smaller learning rate.
+For MLSPL, we followed the paper’s protocol:
+We created a single positive label per image and trained a linear classifier for 25 epochs.
+Then we fine-tuned the full model for 10 more epochs.
+We also performed a hyperparameter search over learning rates and batch sizes, settling on optimal values for both phases.
 
 \section*{Q2L results}
-Here are the numbers. Our Q2L reproductions line up almost perfectly with the paper: 84.9 mAP on ResNet-101 at 448 pixels and up to 91.3 mAP with the CvT backbone. That validates both the original claims and our environment.
+Our Q2L results are shown here.
+For all tested backbones, our reproduced mAP scores match the original paper's results closely — confirming the correctness of our setup.
 
 \section*{MLSPL results}
-For MLSPL, the linear variant hits 66.3 mAP—identical to the paper—and fine-tuning nudges it to 66.9, slightly surpassing the reported 66.3. So even when each training image has only a single confirmed label, ROLE recovers roughly two-thirds of fully supervised performance on COCO.
+For MLSPL with the ROLE loss, our results also align well with the paper.
+We achieved 66.3\% mAP using the linear model and slightly better — 66.9\% — with end-to-end fine-tuning.
+These results show that ROLE is highly effective, especially given that it's trained from just one positive label per image.
 
 
 \end{document}
