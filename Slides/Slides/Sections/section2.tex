@@ -73,7 +73,7 @@
       \textbf{Loss functions}
       \begin{itemize}
         \item Measures distance between prediction (model output) and ground truth.
-        \item Guides parameter optimization.
+        \item Guides parameter optimization by minimizing the loss.
       \end{itemize}
     \end{column}
 
@@ -88,7 +88,7 @@
 \begin{frame}{Background}
   \begin{columns}
     \begin{column}{0.55\textwidth}
-      \textbf{Loss functions covered:}
+      \textbf{Loss functions}
           \begin{itemize}
             \item Binary Cross-Entropy (BCE)
             \item Expected Positive Regularisation (EPR)
@@ -116,11 +116,6 @@
   \vspace{0.4em}
   \begin{equation*}
     \mathcal{L}_{\text{BCE}} = -\frac{1}{K}\sum_{i=1}^{K}\bigl[y_i\log p_i + (1-y_i)\log(1-p_i)\bigr]
-  \end{equation*}
-  % \begin{itemize}
-  %   \item $K$: number of classes; $y_i\in\{0,1\}$, $p_i\in[0,1]$.
-  %   \item Widely used baseline metric.
-  % \end{itemize}
 \end{frame}
 
 %-------------------------------------------------
@@ -148,24 +143,22 @@
   \begin{itemize}
     \item $\kappa$: expected positives per image (domain prior).
     \item $\hat{\kappa}$: average predicted positives in the batch.
-    \item Batch penalty: $    R_\kappa(\mathbf{F}_B) = \left(\frac{\hat{\kappa}(\mathbf{F}_B)-\kappa}{K}\right)^2$.
+    \item $\mathbf{F}\in[0,1]^{N\times K}$: matrix of classifier predictions.
+    \item $\mathbf{\tilde{Y}}\in[0,1]^{N\times K}$: matrix of estimated labels.
+    \item $\mathbf{Z}_B$: fixed partial labels. 
+    \item Batch penalty: $R_\kappa(\mathbf{F}_B) = \left(\frac{\hat{\kappa}(\mathbf{F}_B)-\kappa}{K}\right)^2$.
   \end{itemize}
 \end{frame}
 
 %-------------------------------------------------
 
 \begin{frame}{Background}
-  \textbf{Regularised Online Label Estimation (ROLE)}
-  \begin{itemize}
-    \item Jointly trains classifier $f(\cdot;\theta)$ and label-estimator $g(\cdot;\phi)$.
-    \item Alternating updates:
+  \textbf{Regularised Online Label Estimation (ROLE)}\\
+    Alternating updates:
       \[
         \mathcal{L}'(\mathbf{F}_B,\tilde{\mathbf{Y}}_B) = \frac{1}{|B|}\sum_{n\in B} \mathcal{L}_{BCE}(\mathbf{f}_n,\text{sg}(\tilde{\mathbf{y}}_n)) + \mathcal{L}_{EPR}(\mathbf{F}_B,\mathbf{Z}_B)
       \]
-      $\mathbf{F}\in[0,1]^{N\times K}$: matrix of classifier predictions.\\
-      $\mathbf{\tilde{Y}}\in[0,1]^{N\times K}$: matrix of estimated labels. \\
-      $\mathbf{Z}_B$: fixed partial labels. 
-  \end{itemize}
+
   Final equation:
   \begin{equation*}
     \mathcal{L}_{ROLE}(\mathbf{F}_B, \mathbf{\tilde{Y}}_B) = \frac{\mathcal{L}'(\mathbf{F}_B|\mathbf{\tilde{Y}})+\mathcal{L}'(\mathbf{\tilde{Y}}|\mathbf{F}_B)}{2}
